@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../constants/app_strings.dart';
 import '../../../../navigation/app_router.dart';
+import '../../../../features/settings/presentation/providers/settings_providers.dart';
 import '../../../../shared/widgets/index.dart';
 import '../../../../theme/app_colors.dart';
 import '../../../../theme/app_spacing.dart';
@@ -150,8 +151,15 @@ class _ProjectItem extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Watch currency so the card re-formats when the user changes it in
+    // Settings. Pass the symbol explicitly to avoid relying on the global
+    // static being updated before this rebuild.
+    final currencySymbol = ref.watch(
+      settingsNotifierProvider.select((s) => s.valueOrNull?.currencySymbol),
+    );
     return ProjectCard(
       project: project,
+      currencySymbol: currencySymbol,
       onTap: () => context.pushNamed(
         AppRouteNames.dashboard,
         pathParameters: {'id': project.id.toString()},

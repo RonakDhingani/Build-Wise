@@ -13,12 +13,14 @@ class ProjectCard extends StatelessWidget {
     super.key,
     required this.project,
     required this.onTap,
+    this.currencySymbol,
     this.onEdit,
     this.onArchive,
     this.onDelete,
   });
 
   final ProjectEntity project;
+  final String? currencySymbol;
   final VoidCallback onTap;
   final VoidCallback? onEdit;
   final VoidCallback? onArchive;
@@ -121,7 +123,10 @@ class ProjectCard extends StatelessWidget {
                             color: LightThemeColors.textTertiary,
                           )),
                           Text(
-                            CurrencyFormatter.formatCompact(project.budget),
+                            CurrencyFormatter.formatCompact(
+                              project.budget,
+                              symbol: currencySymbol,
+                            ),
                             style: AppTextStyles.titleSmall,
                           ),
                         ],
@@ -133,7 +138,10 @@ class ProjectCard extends StatelessWidget {
                             color: LightThemeColors.textTertiary,
                           )),
                           Text(
-                            CurrencyFormatter.formatCompact(project.totalSpent),
+                            CurrencyFormatter.formatCompact(
+                              project.totalSpent,
+                              symbol: currencySymbol,
+                            ),
                             style: AppTextStyles.titleSmall.copyWith(
                               color: _budgetColor,
                             ),

@@ -7,6 +7,7 @@ abstract class AppRoutePaths {
 }
 
 abstract class AppRouteNames {
+  static const String splash = 'splash';
   static const String projects = 'projects';
   static const String createProject = 'create-project';
   static const String editProject = 'edit-project';

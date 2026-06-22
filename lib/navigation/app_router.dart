@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../features/splash/presentation/screens/splash_screen.dart';
 import '../features/project/presentation/screens/project_selection_screen.dart';
 import '../features/project/presentation/screens/create_project_screen.dart';
 import '../features/project/presentation/screens/edit_project_screen.dart';
@@ -37,11 +38,12 @@ final _shellNavigatorKey = GlobalKey<NavigatorState>();
 
 final appRouter = GoRouter(
   navigatorKey: _rootNavigatorKey,
-  initialLocation: AppRoutePaths.projects,
+  initialLocation: AppRoutePaths.root,
   routes: [
     GoRoute(
       path: AppRoutePaths.root,
-      redirect: (_, _) => AppRoutePaths.projects,
+      name: AppRouteNames.splash,
+      builder: (context, state) => const SplashScreen(),
     ),
     GoRoute(
       path: AppRoutePaths.projects,
