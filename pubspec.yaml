@@ -25,6 +25,9 @@ dependencies:
   image_picker: ^1.1.2
   flutter_image_compress: ^2.3.0
 
+  # Charts & analytics
+  syncfusion_flutter_charts: ^31.1.17
+
   # PDF generation & sharing
   pdf: ^3.11.1
   printing: ^5.13.2

@@ -102,4 +102,96 @@ class ExpenseRepositoryImpl implements ExpenseRepository {
       return Failure(DatabaseFailure('Failed to load categories: $e'));
     }
   }
+
+  @override
+  Future<Result<ExpenseCategoryEntity>> createCategory(
+    String name, {
+    String? colorHex,
+  }) async {
+    try {
+      final trimmed = name.trim();
+      if (trimmed.isEmpty) {
+        return const Failure(ValidationFailure('Category name is required.'));
+      }
+      final existing = await _isar.expenseCategoryModels
+          .filter()
+          .nameEqualTo(trimmed, caseSensitive: false)
+          .findFirst();
+      if (existing != null) {
+        return const Failure(
+          ValidationFailure('A category with this name already exists.'),
+        );
+      }
+      final model = ExpenseCategoryModel()
+        ..name = trimmed
+        ..isDefault = false
+        ..colorHex = colorHex
+        ..createdAt = DateTime.now();
+      final id = await _isar.writeTxn(() async {
+        return _isar.expenseCategoryModels.put(model);
+      });
+      model.id = id;
+      return Success(ExpenseCategoryMapper.toEntity(model));
+    } catch (e) {
+      return Failure(DatabaseFailure('Failed to create category: $e'));
+    }
+  }
+
+  @override
+  Future<Result<ExpenseCategoryEntity>> updateCategory(
+    ExpenseCategoryEntity entity,
+  ) async {
+    try {
+      final trimmed = entity.name.trim();
+      if (trimmed.isEmpty) {
+        return const Failure(ValidationFailure('Category name is required.'));
+      }
+      final model = await _isar.expenseCategoryModels.get(entity.id);
+      if (model == null) {
+        return const Failure(NotFoundFailure('Category not found.'));
+      }
+      final clash = await _isar.expenseCategoryModels
+          .filter()
+          .nameEqualTo(trimmed, caseSensitive: false)
+          .and()
+          .not()
+          .idEqualTo(entity.id)
+          .findFirst();
+      if (clash != null) {
+        return const Failure(
+          ValidationFailure('A category with this name already exists.'),
+        );
+      }
+      model
+        ..name = trimmed
+        ..colorHex = entity.colorHex;
+      await _isar.writeTxn(() async {
+        await _isar.expenseCategoryModels.put(model);
+      });
+      return Success(ExpenseCategoryMapper.toEntity(model));
+    } catch (e) {
+      return Failure(DatabaseFailure('Failed to update category: $e'));
+    }
+  }
+
+  @override
+  Future<Result<void>> deleteCategory(int id) async {
+    try {
+      final inUse = await _isar.expenseModels
+          .filter()
+          .categoryIdEqualTo(id)
+          .count();
+      if (inUse > 0) {
+        return Failure(ValidationFailure(
+          'Cannot delete: $inUse expense(s) use this category.',
+        ));
+      }
+      await _isar.writeTxn(() async {
+        await _isar.expenseCategoryModels.delete(id);
+      });
+      return const Success(null);
+    } catch (e) {
+      return Failure(DatabaseFailure('Failed to delete category: $e'));
+    }
+  }
 }

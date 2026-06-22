@@ -3,8 +3,13 @@ import 'package:intl/intl.dart';
 class DateFormatter {
   DateFormatter._();
 
-  static String format(DateTime date, {String pattern = 'dd/MM/yyyy'}) {
-    return DateFormat(pattern).format(date);
+  /// Active date pattern — updated from app settings (Settings → Date Format)
+  /// at startup and whenever the user changes it. Call sites that pass an
+  /// explicit [pattern] override this.
+  static String pattern = 'dd/MM/yyyy';
+
+  static String format(DateTime date, {String? pattern}) {
+    return DateFormat(pattern ?? DateFormatter.pattern).format(date);
   }
 
   static String formatRelative(DateTime date) {
@@ -29,9 +34,9 @@ class DateFormatter {
     return DateFormat('dd MMMM yyyy').format(date);
   }
 
-  static DateTime? tryParse(String text, {String pattern = 'dd/MM/yyyy'}) {
+  static DateTime? tryParse(String text, {String? pattern}) {
     try {
-      return DateFormat(pattern).parseStrict(text);
+      return DateFormat(pattern ?? DateFormatter.pattern).parseStrict(text);
     } catch (_) {
       return null;
     }

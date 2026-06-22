@@ -4,7 +4,6 @@ import 'package:isar/isar.dart';
 import '../../../../core/database/database_provider.dart';
 import '../../../../core/result/result.dart';
 import '../../../expense/domain/entities/expense_entity.dart';
-import '../../../expense/presentation/notifiers/expense_notifier.dart';
 import '../../../expense/presentation/providers/expense_providers.dart';
 import '../../../project/domain/entities/project_entity.dart';
 import '../../../project/presentation/providers/project_providers.dart';
@@ -33,12 +32,14 @@ class StageProgress {
 class DashboardData {
   const DashboardData({
     required this.project,
+    required this.expenses,
     required this.recentExpenses,
     required this.categories,
     required this.stages,
   });
 
   final ProjectEntity project;
+  final List<ExpenseEntity> expenses;
   final List<ExpenseEntity> recentExpenses;
   final List<ExpenseCategoryEntity> categories;
   final List<StageProgress> stages;
@@ -95,6 +96,7 @@ final dashboardProvider =
 
   return DashboardData(
     project: project,
+    expenses: allExpenses,
     recentExpenses: recentExpenses,
     categories: categories,
     stages: stages,

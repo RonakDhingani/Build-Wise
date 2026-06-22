@@ -14,6 +14,16 @@ import '../features/material/presentation/screens/add_edit_material_screen.dart'
 import '../features/report/presentation/screens/reports_screen.dart';
 import '../features/report/presentation/screens/pdf_viewer_screen.dart';
 import '../features/settings/presentation/screens/settings_screen.dart';
+import '../features/settings/presentation/screens/manage_projects_screen.dart';
+import '../features/settings/presentation/screens/default_project_screen.dart';
+import '../features/settings/presentation/screens/expense_categories_screen.dart';
+import '../features/settings/presentation/screens/currency_screen.dart';
+import '../features/settings/presentation/screens/date_format_screen.dart';
+import '../features/settings/presentation/screens/theme_screen.dart';
+import '../features/settings/presentation/screens/about_screen.dart';
+import '../features/settings/presentation/screens/privacy_policy_screen.dart';
+import '../features/settings/presentation/screens/terms_screen.dart';
+import '../features/settings/presentation/screens/contact_support_screen.dart';
 import '../features/stage/presentation/screens/stages_screen.dart';
 import '../features/stage/presentation/screens/stage_detail_screen.dart';
 import '../features/stage/presentation/screens/add_edit_stage_screen.dart';
@@ -22,7 +32,11 @@ import '../features/photo/presentation/screens/photo_detail_screen.dart';
 
 part 'route_names.dart';
 
+final _rootNavigatorKey = GlobalKey<NavigatorState>();
+final _shellNavigatorKey = GlobalKey<NavigatorState>();
+
 final appRouter = GoRouter(
+  navigatorKey: _rootNavigatorKey,
   initialLocation: AppRoutePaths.projects,
   routes: [
     GoRoute(
@@ -112,7 +126,58 @@ final appRouter = GoRouter(
             ),
           ],
         ),
+        GoRoute(
+          path: ':id/manage-projects',
+          name: AppRouteNames.manageProjects,
+          builder: (context, state) => const ManageProjectsScreen(),
+        ),
+        GoRoute(
+          path: ':id/default-project',
+          name: AppRouteNames.defaultProject,
+          builder: (context, state) => const DefaultProjectScreen(),
+        ),
+        GoRoute(
+          path: ':id/expense-categories',
+          name: AppRouteNames.expenseCategories,
+          builder: (context, state) => const ExpenseCategoriesScreen(),
+        ),
+        GoRoute(
+          path: ':id/currency',
+          name: AppRouteNames.currency,
+          builder: (context, state) => const CurrencyScreen(),
+        ),
+        GoRoute(
+          path: ':id/date-format',
+          name: AppRouteNames.dateFormat,
+          builder: (context, state) => const DateFormatScreen(),
+        ),
+        GoRoute(
+          path: ':id/theme',
+          name: AppRouteNames.theme,
+          builder: (context, state) => const ThemeScreen(),
+        ),
+        GoRoute(
+          path: ':id/about',
+          name: AppRouteNames.about,
+          builder: (context, state) => const AboutScreen(),
+        ),
+        GoRoute(
+          path: ':id/privacy-policy',
+          name: AppRouteNames.privacyPolicy,
+          builder: (context, state) => const PrivacyPolicyScreen(),
+        ),
+        GoRoute(
+          path: ':id/terms',
+          name: AppRouteNames.terms,
+          builder: (context, state) => const TermsScreen(),
+        ),
+        GoRoute(
+          path: ':id/contact-support',
+          name: AppRouteNames.contactSupport,
+          builder: (context, state) => const ContactSupportScreen(),
+        ),
         ShellRoute(
+          navigatorKey: _shellNavigatorKey,
           builder: (context, state, child) {
             final id = int.parse(
               state.pathParameters['id'] ?? '0',
@@ -139,6 +204,7 @@ final appRouter = GoRouter(
                 GoRoute(
                   path: 'add',
                   name: AppRouteNames.addExpense,
+                  parentNavigatorKey: _rootNavigatorKey,
                   builder: (context, state) {
                     final id = int.parse(state.pathParameters['id']!);
                     return AddEditExpenseScreen(projectId: id);
@@ -147,6 +213,7 @@ final appRouter = GoRouter(
                 GoRoute(
                   path: ':expenseId',
                   name: AppRouteNames.expenseDetail,
+                  parentNavigatorKey: _rootNavigatorKey,
                   builder: (context, state) {
                     final id = int.parse(state.pathParameters['id']!);
                     final expId =
@@ -157,6 +224,7 @@ final appRouter = GoRouter(
                     GoRoute(
                       path: 'edit',
                       name: AppRouteNames.editExpense,
+                      parentNavigatorKey: _rootNavigatorKey,
                       builder: (context, state) {
                         final id = int.parse(state.pathParameters['id']!);
                         final expId =
@@ -182,6 +250,7 @@ final appRouter = GoRouter(
                 GoRoute(
                   path: 'add',
                   name: AppRouteNames.addMaterial,
+                  parentNavigatorKey: _rootNavigatorKey,
                   builder: (context, state) {
                     final id = int.parse(state.pathParameters['id']!);
                     return AddEditMaterialScreen(projectId: id);
@@ -190,6 +259,7 @@ final appRouter = GoRouter(
                 GoRoute(
                   path: ':materialId',
                   name: AppRouteNames.materialDetail,
+                  parentNavigatorKey: _rootNavigatorKey,
                   builder: (context, state) {
                     final id = int.parse(state.pathParameters['id']!);
                     final matId = int.parse(state.pathParameters['materialId']!);
@@ -199,6 +269,7 @@ final appRouter = GoRouter(
                     GoRoute(
                       path: 'edit',
                       name: AppRouteNames.editMaterial,
+                      parentNavigatorKey: _rootNavigatorKey,
                       builder: (context, state) {
                         final id = int.parse(state.pathParameters['id']!);
                         final matId =
@@ -224,6 +295,7 @@ final appRouter = GoRouter(
                 GoRoute(
                   path: 'pdf',
                   name: AppRouteNames.pdfViewer,
+                  parentNavigatorKey: _rootNavigatorKey,
                   builder: (context, state) {
                     final id = int.parse(state.pathParameters['id']!);
                     return PdfViewerScreen(projectId: id);

@@ -8,4 +8,12 @@ abstract class ExpenseRepository {
   Future<Result<List<ExpenseEntity>>> getExpensesByProject(int projectId);
   Future<Result<ExpenseEntity>> getExpenseById(int id);
   Future<Result<List<ExpenseCategoryEntity>>> getCategories();
+  Future<Result<ExpenseCategoryEntity>> createCategory(
+    String name, {
+    String? colorHex,
+  });
+  Future<Result<ExpenseCategoryEntity>> updateCategory(
+    ExpenseCategoryEntity entity,
+  );
+  Future<Result<void>> deleteCategory(int id);
 }

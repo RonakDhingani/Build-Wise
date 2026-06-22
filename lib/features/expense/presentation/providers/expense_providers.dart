@@ -7,12 +7,16 @@ import '../../../stage/data/models/stage_isar_model.dart';
 import '../../data/repositories/expense_repository_impl.dart';
 import '../../domain/entities/expense_entity.dart';
 import '../../domain/repositories/expense_repository.dart';
+import '../../domain/use_cases/create_category_use_case.dart';
 import '../../domain/use_cases/create_expense_use_case.dart';
+import '../../domain/use_cases/delete_category_use_case.dart';
 import '../../domain/use_cases/delete_expense_use_case.dart';
 import '../../domain/use_cases/get_categories_use_case.dart';
 import '../../domain/use_cases/get_expense_by_id_use_case.dart';
 import '../../domain/use_cases/get_expenses_use_case.dart';
+import '../../domain/use_cases/update_category_use_case.dart';
 import '../../domain/use_cases/update_expense_use_case.dart';
+import '../notifiers/category_notifier.dart';
 import '../notifiers/expense_notifier.dart';
 
 final expenseRepositoryProvider = Provider<ExpenseRepository>((ref) {
@@ -42,6 +46,23 @@ final getExpenseByIdUseCaseProvider = Provider<GetExpenseByIdUseCase>((ref) {
 final getCategoriesUseCaseProvider = Provider<GetCategoriesUseCase>((ref) {
   return GetCategoriesUseCase(ref.read(expenseRepositoryProvider));
 });
+
+final createCategoryUseCaseProvider = Provider<CreateCategoryUseCase>((ref) {
+  return CreateCategoryUseCase(ref.read(expenseRepositoryProvider));
+});
+
+final updateCategoryUseCaseProvider = Provider<UpdateCategoryUseCase>((ref) {
+  return UpdateCategoryUseCase(ref.read(expenseRepositoryProvider));
+});
+
+final deleteCategoryUseCaseProvider = Provider<DeleteCategoryUseCase>((ref) {
+  return DeleteCategoryUseCase(ref.read(expenseRepositoryProvider));
+});
+
+final categoriesNotifierProvider =
+    AsyncNotifierProvider<CategoriesNotifier, List<ExpenseCategoryEntity>>(
+  CategoriesNotifier.new,
+);
 
 final expensesNotifierProvider =
     AsyncNotifierProvider.family<ExpensesNotifier, ExpenseState, int>(

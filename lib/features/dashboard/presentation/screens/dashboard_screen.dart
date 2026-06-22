@@ -9,6 +9,7 @@ import '../../../../theme/app_colors.dart';
 import '../../../../theme/app_shadows.dart';
 import '../../../../theme/app_spacing.dart';
 import '../../../../theme/app_text_styles.dart';
+import '../../../../utils/analytics.dart';
 import '../../../../utils/currency_formatter.dart';
 import '../../../../utils/date_formatter.dart';
 import '../../../expense/domain/entities/expense_entity.dart';
@@ -25,10 +26,7 @@ class DashboardScreen extends ConsumerWidget {
 
     return async.when(
       skipLoadingOnReload: true,
-      loading: () => const AppScaffold(
-        appBar: null,
-        body: AppLoadingWidget(),
-      ),
+      loading: () => const AppScaffold(appBar: null, body: AppLoadingWidget()),
       error: (e, _) => AppScaffold(
         appBar: AppBarWidget(title: 'Dashboard', showBackButton: false),
         body: AppErrorState(
@@ -54,8 +52,29 @@ class _DashboardBody extends StatelessWidget {
     final healthColor = budgetHealth >= AppConstants.budgetCriticalThreshold
         ? LightThemeColors.budgetCritical
         : budgetHealth >= AppConstants.budgetWarningThreshold
-            ? LightThemeColors.budgetWarning
-            : LightThemeColors.budgetHealthy;
+        ? LightThemeColors.budgetWarning
+        : LightThemeColors.budgetHealthy;
+
+    final expenseSlices = Analytics.expensesByCategory(
+      data.expenses,
+      data.categories,
+    );
+    final monthly = Analytics.monthlyExpenseTrend(data.expenses);
+    final stageSlices = [
+      for (final s in data.stages)
+        ChartSlice(
+          label: s.name,
+          value: s.progressPercent.toDouble(),
+          color: s.isCompleted
+              ? AppColors.success500
+              : s.isInProgress
+              ? AppColors.navy500
+              : AppColors.neutral400,
+        ),
+    ];
+    final stageChartHeight = (120 + data.stages.length * 34)
+        .clamp(180, 420)
+        .toDouble();
 
     return AppScaffold(
       appBar: AppBarWidget(
@@ -69,6 +88,10 @@ class _DashboardBody extends StatelessWidget {
           vertical: AppSpacing.pageVertical,
         ),
         children: [
+          // Greeting
+          const _Greeting(),
+          const SizedBox(height: AppSpacing.lg),
+
           // Budget card
           _BudgetCard(
             budget: project.budget,
@@ -80,7 +103,7 @@ class _DashboardBody extends StatelessWidget {
 
           const SizedBox(height: AppSpacing.md),
 
-          // Completion card
+          // Overall progress
           _CompletionCard(percent: project.completionPercentage),
 
           const SizedBox(height: AppSpacing.xl),
@@ -99,10 +122,12 @@ class _DashboardBody extends StatelessWidget {
                   AppRouteNames.expenses,
                   pathParameters: {'id': projectId.toString()},
                 ),
-                child: Text('See all',
-                    style: AppTextStyles.labelMedium.copyWith(
-                      color: LightThemeColors.primary,
-                    )),
+                child: Text(
+                  'See all',
+                  style: AppTextStyles.labelMedium.copyWith(
+                    color: LightThemeColors.primary,
+                  ),
+                ),
               ),
             ),
             const SizedBox(height: AppSpacing.md),
@@ -111,19 +136,15 @@ class _DashboardBody extends StatelessWidget {
                   .where((c) => c.id == expense.categoryId)
                   .firstOrNull;
               return Padding(
-                padding:
-                    const EdgeInsets.only(bottom: AppSpacing.itemGap),
+                padding: const EdgeInsets.only(bottom: AppSpacing.itemGap),
                 child: AppExpenseCard(
                   categoryName: cat?.name ?? 'Uncategorized',
-                  categoryColor:
-                      cat?.color ?? LightThemeColors.primary,
+                  categoryColor: cat?.color ?? LightThemeColors.primary,
                   amount: expense.amount,
-                  formattedAmount:
-                      CurrencyFormatter.format(expense.amount),
+                  formattedAmount: CurrencyFormatter.format(expense.amount),
                   description: expense.description,
                   vendorName: expense.vendorName,
-                  formattedDate:
-                      DateFormatter.formatShort(expense.date),
+                  formattedDate: DateFormatter.formatShort(expense.date),
                   paymentTypeLabel: expense.paymentMethod.label,
                   onTap: () => context.pushNamed(
                     AppRouteNames.expenseDetail,
@@ -135,26 +156,134 @@ class _DashboardBody extends StatelessWidget {
                 ),
               );
             }),
-            const SizedBox(height: AppSpacing.lg),
+            const SizedBox(height: AppSpacing.xl),
           ],
 
-          // Stages overview
-          if (data.stages.isNotEmpty) ...[
-            const SectionHeader(title: 'Stage Progress'),
-            const SizedBox(height: AppSpacing.md),
-            ...data.stages.map(
-              (stage) => Padding(
-                padding: const EdgeInsets.only(bottom: AppSpacing.md),
-                child: _StageProgressTile(
-                  stage: stage,
-                  projectId: projectId,
-                ),
-              ),
+          // Charts (bottom)
+          ChartCard(
+            key: const ValueKey('chart:Expense Breakdown'),
+            title: 'Expense Breakdown',
+            subtitle: 'Where your money is spent',
+            isEmpty: expenseSlices.isEmpty,
+            height: 360,
+            child: AppDonutChart(slices: expenseSlices),
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          ChartCard(
+            key: const ValueKey('chart:Stage Progress'),
+            title: 'Stage Progress',
+            subtitle: 'Tap a stage to update its progress',
+            isEmpty: stageSlices.isEmpty,
+            height: stageChartHeight,
+            child: AppHorizontalBarChart(
+              bars: stageSlices,
+              isPercent: true,
+              onBarTap: (index) {
+                if (index < 0 || index >= data.stages.length) return;
+                context.pushNamed(
+                  AppRouteNames.stageDetail,
+                  pathParameters: {
+                    'id': projectId.toString(),
+                    'stageId': data.stages[index].id.toString(),
+                  },
+                );
+              },
             ),
-            const SizedBox(height: AppSpacing.lg),
-          ],
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          ChartCard(
+            key: const ValueKey('chart:Monthly Spending'),
+            title: 'Monthly Spending',
+            subtitle: 'Last 6 months',
+            isEmpty: monthly.every((p) => p.value == 0),
+            height: 230,
+            child: AppLineChart(points: monthly),
+          ),
+          const SizedBox(height: AppSpacing.lg),
         ],
       ),
+    );
+  }
+}
+
+class _CompletionCard extends StatelessWidget {
+  const _CompletionCard({required this.percent});
+
+  final double percent;
+
+  @override
+  Widget build(BuildContext context) {
+    final pct = percent.clamp(0.0, 100.0);
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.cardPadding),
+      decoration: BoxDecoration(
+        color: LightThemeColors.cardBg,
+        borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
+        boxShadow: AppShadows.card,
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Overall Progress',
+                  style: AppTextStyles.labelMedium.copyWith(
+                    color: LightThemeColors.textSecondary,
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.xs),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(AppDimensions.radiusFull),
+                  child: LinearProgressIndicator(
+                    value: pct / 100,
+                    minHeight: AppDimensions.progressBarHeight,
+                    backgroundColor: AppColors.neutral200,
+                    valueColor: const AlwaysStoppedAnimation<Color>(
+                      LightThemeColors.primary,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: AppSpacing.lg),
+          Text(
+            '${pct.toStringAsFixed(0)}%',
+            style: AppTextStyles.headlineSmall.copyWith(
+              color: LightThemeColors.primary,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _Greeting extends StatelessWidget {
+  const _Greeting();
+
+  @override
+  Widget build(BuildContext context) {
+    final hour = DateTime.now().hour;
+    final part = hour < 12
+        ? 'Good Morning'
+        : hour < 17
+        ? 'Good Afternoon'
+        : 'Good Evening';
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('$part 👋', style: AppTextStyles.titleLarge),
+        const SizedBox(height: AppSpacing.xs),
+        Text(
+          "Here's what's happening with your project.",
+          style: AppTextStyles.bodyMedium.copyWith(
+            color: LightThemeColors.textSecondary,
+          ),
+        ),
+      ],
     );
   }
 }
@@ -186,9 +315,12 @@ class _BudgetCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Budget Overview',
-              style: AppTextStyles.labelMedium
-                  .copyWith(color: LightThemeColors.textSecondary)),
+          Text(
+            'Budget Overview',
+            style: AppTextStyles.labelMedium.copyWith(
+              color: LightThemeColors.textSecondary,
+            ),
+          ),
           const SizedBox(height: AppSpacing.md),
           Row(
             children: [
@@ -213,8 +345,7 @@ class _BudgetCard extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.md),
           ClipRRect(
-            borderRadius:
-                BorderRadius.circular(AppDimensions.radiusFull),
+            borderRadius: BorderRadius.circular(AppDimensions.radiusFull),
             child: LinearProgressIndicator(
               value: spentPercent,
               minHeight: AppDimensions.progressBarHeight,
@@ -225,8 +356,9 @@ class _BudgetCard extends StatelessWidget {
           const SizedBox(height: AppSpacing.xs),
           Text(
             '${(spentPercent * 100).toStringAsFixed(1)}% of budget used',
-            style: AppTextStyles.bodySmall
-                .copyWith(color: LightThemeColors.textTertiary),
+            style: AppTextStyles.bodySmall.copyWith(
+              color: LightThemeColors.textTertiary,
+            ),
           ),
         ],
       ),
@@ -251,62 +383,14 @@ class _BudgetStat extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label,
-              style: AppTextStyles.labelSmall
-                  .copyWith(color: LightThemeColors.textTertiary)),
-          const SizedBox(height: AppSpacing.xs),
-          Text(value,
-              style: AppTextStyles.monoMedium.copyWith(color: color)),
-        ],
-      ),
-    );
-  }
-}
-
-class _CompletionCard extends StatelessWidget {
-  const _CompletionCard({required this.percent});
-  final double percent;
-
-  @override
-  Widget build(BuildContext context) {
-    final pct = percent.clamp(0.0, 100.0);
-    return Container(
-      padding: const EdgeInsets.all(AppSpacing.cardPadding),
-      decoration: BoxDecoration(
-        color: LightThemeColors.cardBg,
-        borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
-        boxShadow: AppShadows.card,
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('Overall Progress',
-                    style: AppTextStyles.labelMedium
-                        .copyWith(color: LightThemeColors.textSecondary)),
-                const SizedBox(height: AppSpacing.xs),
-                ClipRRect(
-                  borderRadius:
-                      BorderRadius.circular(AppDimensions.radiusFull),
-                  child: LinearProgressIndicator(
-                    value: pct / 100,
-                    minHeight: AppDimensions.progressBarHeight,
-                    backgroundColor: AppColors.neutral200,
-                    valueColor: const AlwaysStoppedAnimation<Color>(
-                        LightThemeColors.primary),
-                  ),
-                ),
-              ],
+          Text(
+            label,
+            style: AppTextStyles.labelSmall.copyWith(
+              color: LightThemeColors.textTertiary,
             ),
           ),
-          const SizedBox(width: AppSpacing.lg),
-          Text(
-            '${pct.toStringAsFixed(0)}%',
-            style: AppTextStyles.headlineSmall
-                .copyWith(color: LightThemeColors.primary),
-          ),
+          const SizedBox(height: AppSpacing.xs),
+          Text(value, style: AppTextStyles.monoMedium.copyWith(color: color)),
         ],
       ),
     );
@@ -315,6 +399,7 @@ class _CompletionCard extends StatelessWidget {
 
 class _QuickActions extends StatelessWidget {
   const _QuickActions({required this.projectId});
+
   final int projectId;
 
   @override
@@ -375,104 +460,41 @@ class _ActionButton extends StatelessWidget {
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.symmetric(
-          vertical: AppSpacing.md,
+          vertical: AppSpacing.lg,
           horizontal: AppSpacing.sm,
         ),
         decoration: BoxDecoration(
-          color: LightThemeColors.primaryLight,
-          borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
+          color: LightThemeColors.surface,
+          borderRadius: BorderRadius.circular(AppDimensions.radiusLg),
+          border: Border.all(color: LightThemeColors.border),
+          boxShadow: AppShadows.card,
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon,
-                size: AppDimensions.iconMd,
-                color: LightThemeColors.primary),
+            Container(
+              width: 38,
+              height: 38,
+              decoration: BoxDecoration(
+                color: LightThemeColors.primary.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
+              ),
+              child: Icon(
+                icon,
+                size: AppDimensions.iconSm,
+                color: LightThemeColors.primary,
+              ),
+            ),
+            const SizedBox(height: AppSpacing.sm),
             const SizedBox(height: AppSpacing.xs),
             Text(
               label,
-              style: AppTextStyles.labelSmall
-                  .copyWith(color: LightThemeColors.primary),
+              style: AppTextStyles.labelSmall.copyWith(
+                color: LightThemeColors.primary,
+              ),
               textAlign: TextAlign.center,
             ),
           ],
-        ),
-      ),
-    );
-  }
-}
-
-class _StageProgressTile extends StatelessWidget {
-  const _StageProgressTile({
-    required this.stage,
-    required this.projectId,
-  });
-  final StageProgress stage;
-  final int projectId;
-
-  @override
-  Widget build(BuildContext context) {
-    final color = stage.isCompleted
-        ? AppColors.success500
-        : stage.isInProgress
-            ? LightThemeColors.primary
-            : LightThemeColors.textTertiary;
-
-    return InkWell(
-      onTap: () => context.pushNamed(
-        AppRouteNames.stageDetail,
-        pathParameters: {
-          'id': projectId.toString(),
-          'stageId': stage.id.toString(),
-        },
-      ),
-      borderRadius: BorderRadius.circular(AppDimensions.radiusSm),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
-        child: Row(
-          children: [
-        Icon(
-          stage.isCompleted
-              ? Icons.check_circle
-              : stage.isInProgress
-                  ? Icons.radio_button_checked
-                  : Icons.radio_button_unchecked,
-          size: AppDimensions.iconSm,
-          color: color,
-        ),
-        const SizedBox(width: AppSpacing.md),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(stage.name, style: AppTextStyles.bodyMedium),
-              const SizedBox(height: AppSpacing.xs),
-              ClipRRect(
-                borderRadius:
-                    BorderRadius.circular(AppDimensions.radiusFull),
-                child: LinearProgressIndicator(
-                  value: stage.progressPercent / 100,
-                  minHeight: AppDimensions.progressBarThin,
-                  backgroundColor: AppColors.neutral200,
-                  valueColor: AlwaysStoppedAnimation<Color>(color),
-                ),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(width: AppSpacing.md),
-        Text(
-          '${stage.progressPercent}%',
-          style: AppTextStyles.labelSmall
-              .copyWith(color: LightThemeColors.textSecondary),
-        ),
-        const SizedBox(width: AppSpacing.xs),
-        Icon(
-          Icons.chevron_right,
-          size: AppDimensions.iconSm,
-          color: LightThemeColors.textTertiary,
-        ),
-      ],
         ),
       ),
     );

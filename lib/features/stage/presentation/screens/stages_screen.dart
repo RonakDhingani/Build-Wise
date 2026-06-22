@@ -62,8 +62,9 @@ class StagesScreen extends ConsumerWidget {
       ),
       builder: (_) => _SearchSheet(
         projectId: projectId,
-        onChanged: (q) =>
-            ref.read(stagesNotifierProvider(projectId).notifier).updateSearch(q),
+        onChanged: (q) => ref
+            .read(stagesNotifierProvider(projectId).notifier)
+            .updateSearch(q),
       ),
     );
   }
@@ -115,11 +116,24 @@ class _Body extends ConsumerWidget {
 
         const SizedBox(height: AppSpacing.lg),
 
-        // Status filter chips
-        _StatusChips(state: state, projectId: projectId),
+        // Status filter tabs
+        AppFilterTabs(
+          tabs: _statusTabs.map((t) => t.label).toList(),
+          selectedIndex: _statusTabs.indexWhere(
+            (t) => t.status == state.statusFilter,
+          ),
+          onSelected: (i) => ref
+              .read(stagesNotifierProvider(projectId).notifier)
+              .setStatusFilter(_statusTabs[i].status),
+        ),
 
-        const SizedBox(height: AppSpacing.sm),
-        Divider(height: 1, color: LightThemeColors.border),
+        const SizedBox(height: AppSpacing.lg),
+        Divider(
+          height: 1,
+          color: LightThemeColors.border,
+          indent: AppSpacing.pageHorizontal,
+          endIndent: AppSpacing.pageHorizontal,
+        ),
 
         // List
         Expanded(
@@ -230,94 +244,20 @@ class _StageItem extends ConsumerWidget {
   }
 
   StageCardStatus _mapStatus(StageStatus s) => switch (s) {
-        StageStatus.notStarted => StageCardStatus.notStarted,
-        StageStatus.inProgress => StageCardStatus.inProgress,
-        StageStatus.completed => StageCardStatus.completed,
-        StageStatus.onHold => StageCardStatus.onHold,
-      };
+    StageStatus.notStarted => StageCardStatus.notStarted,
+    StageStatus.inProgress => StageCardStatus.inProgress,
+    StageStatus.completed => StageCardStatus.completed,
+    StageStatus.onHold => StageCardStatus.onHold,
+  };
 }
 
-class _StatusChips extends ConsumerWidget {
-  const _StatusChips({required this.state, required this.projectId});
-
-  final StageState state;
-  final int projectId;
-
-  static const _filters = [
-    (label: 'All', status: null),
-    (label: 'Not Started', status: StageStatus.notStarted),
-    (label: 'In Progress', status: StageStatus.inProgress),
-    (label: 'Completed', status: StageStatus.completed),
-    (label: 'On Hold', status: StageStatus.onHold),
-  ];
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return SizedBox(
-      height: 36,
-      child: ListView(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.pageHorizontal,
-        ),
-        children: _filters.map((f) {
-          final selected = state.statusFilter == f.status;
-          return Padding(
-            padding: const EdgeInsets.only(right: AppSpacing.sm),
-            child: _Chip(
-              label: f.label,
-              selected: selected,
-              onTap: () => ref
-                  .read(stagesNotifierProvider(projectId).notifier)
-                  .setStatusFilter(f.status),
-            ),
-          );
-        }).toList(),
-      ),
-    );
-  }
-}
-
-class _Chip extends StatelessWidget {
-  const _Chip({
-    required this.label,
-    required this.selected,
-    required this.onTap,
-  });
-
-  final String label;
-  final bool selected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 150),
-        alignment: Alignment.center,
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.md,
-          vertical: AppSpacing.xs,
-        ),
-        decoration: BoxDecoration(
-          color: selected ? LightThemeColors.primary : AppColors.neutral100,
-          borderRadius: BorderRadius.circular(AppDimensions.radiusFull),
-          border: Border.all(
-            color: selected ? LightThemeColors.primary : AppColors.neutral300,
-            width: 1,
-          ),
-        ),
-        child: Text(
-          label,
-          style: AppTextStyles.labelMedium.copyWith(
-            color: selected ? Colors.white : LightThemeColors.textSecondary,
-          ),
-        ),
-      ),
-    );
-  }
-}
+const _statusTabs = [
+  (label: 'All', status: null),
+  (label: 'Not Started', status: StageStatus.notStarted),
+  (label: 'In Progress', status: StageStatus.inProgress),
+  (label: 'Completed', status: StageStatus.completed),
+  (label: 'On Hold', status: StageStatus.onHold),
+];
 
 class _SearchSheet extends StatefulWidget {
   const _SearchSheet({required this.projectId, required this.onChanged});
@@ -350,10 +290,7 @@ class _SearchSheetState extends State<_SearchSheet> {
         children: [
           Text('Search Stages', style: AppTextStyles.titleMedium),
           const SizedBox(height: AppSpacing.md),
-          AppSearchField(
-            hint: 'Stage name...',
-            onChanged: widget.onChanged,
-          ),
+          AppSearchField(hint: 'Stage name...', onChanged: widget.onChanged),
         ],
       ),
     );

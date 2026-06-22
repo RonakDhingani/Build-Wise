@@ -28,4 +28,16 @@ abstract class AppRouteNames {
   static const String editStage = 'edit-stage';
   static const String photos = 'photos';
   static const String photoDetail = 'photo-detail';
+
+  // Settings sub-screens
+  static const String manageProjects = 'manage-projects';
+  static const String defaultProject = 'default-project';
+  static const String expenseCategories = 'expense-categories';
+  static const String currency = 'currency';
+  static const String dateFormat = 'date-format';
+  static const String theme = 'theme';
+  static const String about = 'about';
+  static const String privacyPolicy = 'privacy-policy';
+  static const String terms = 'terms';
+  static const String contactSupport = 'contact-support';
 }

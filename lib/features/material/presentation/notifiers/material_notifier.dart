@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/result/result.dart';
+import '../../../project/presentation/providers/project_providers.dart';
 import '../../domain/entities/material_entity.dart';
 import '../providers/material_providers.dart';
 
@@ -97,6 +98,7 @@ class MaterialsNotifier extends FamilyAsyncNotifier<MaterialsState, int> {
       },
       failure: (f) => throw Exception(f.message),
     );
+    ref.read(projectsNotifierProvider.notifier).refresh();
   }
 
   Future<void> updateMaterial(MaterialEntity entity) async {
@@ -113,6 +115,7 @@ class MaterialsNotifier extends FamilyAsyncNotifier<MaterialsState, int> {
       },
       failure: (f) => throw Exception(f.message),
     );
+    ref.read(projectsNotifierProvider.notifier).refresh();
   }
 
   Future<void> deleteMaterial(int id) async {
@@ -128,6 +131,7 @@ class MaterialsNotifier extends FamilyAsyncNotifier<MaterialsState, int> {
       },
       failure: (f) => throw Exception(f.message),
     );
+    ref.read(projectsNotifierProvider.notifier).refresh();
   }
 
   void updateSearch(String query) {

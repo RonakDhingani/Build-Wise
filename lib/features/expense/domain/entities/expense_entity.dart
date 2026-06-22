@@ -15,6 +15,22 @@ class ExpenseCategoryEntity {
   final String? colorHex;
   final DateTime createdAt;
 
+  ExpenseCategoryEntity copyWith({
+    int? id,
+    String? name,
+    bool? isDefault,
+    String? colorHex,
+    DateTime? createdAt,
+  }) {
+    return ExpenseCategoryEntity(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      isDefault: isDefault ?? this.isDefault,
+      colorHex: colorHex ?? this.colorHex,
+      createdAt: createdAt ?? this.createdAt,
+    );
+  }
+
   Color get color {
     if (colorHex != null) {
       try {

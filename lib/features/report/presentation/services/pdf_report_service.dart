@@ -290,7 +290,7 @@ abstract class PdfReportService {
     return pw.Column(
       crossAxisAlignment: pw.CrossAxisAlignment.start,
       children: [
-        _sectionTitle('Expenses by Category  — Total: ${_formatAmount(total)}'),
+        _sectionTitle('Expenses by Category  -  Total: ${_formatAmount(total)}'),
         pw.SizedBox(height: 10),
         pw.Table(
           border: pw.TableBorder.all(color: _border, width: 0.5),
@@ -362,7 +362,7 @@ abstract class PdfReportService {
                     _tableCell(
                         '${m.remaining.toStringAsFixed(m.remaining.truncateToDouble() == m.remaining ? 0 : 1)} ${m.unit.label}'),
                     _tableCell(
-                        m.totalCost > 0 ? _formatAmount(m.totalCost) : '—'),
+                        m.totalCost > 0 ? _formatAmount(m.totalCost) : '-'),
                   ],
                 )),
           ],
@@ -483,14 +483,16 @@ abstract class PdfReportService {
     );
   }
 
+  // PDF base font (Helvetica) lacks the ₹ glyph, so use the ASCII "Rs"
+  // prefix in generated reports to avoid tofu boxes.
   static String _formatAmount(double amount) {
     if (amount >= 10000000) {
-      return '₹${(amount / 10000000).toStringAsFixed(2)}Cr';
+      return 'Rs ${(amount / 10000000).toStringAsFixed(2)}Cr';
     } else if (amount >= 100000) {
-      return '₹${(amount / 100000).toStringAsFixed(2)}L';
+      return 'Rs ${(amount / 100000).toStringAsFixed(2)}L';
     } else if (amount >= 1000) {
-      return '₹${(amount / 1000).toStringAsFixed(1)}K';
+      return 'Rs ${(amount / 1000).toStringAsFixed(1)}K';
     }
-    return '₹${amount.toStringAsFixed(0)}';
+    return 'Rs ${amount.toStringAsFixed(0)}';
   }
 }

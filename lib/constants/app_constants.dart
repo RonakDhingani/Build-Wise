@@ -3,6 +3,26 @@ abstract class AppConstants {
   static const int dbSchemaVersion = 1;
   static const int appSettingsId = 0;
 
+  // App info (Settings → About)
+  static const String appVersion = '1.0.0';
+  static const String buildNumber = '1';
+  static const String supportEmail = 'support@buildwise.app';
+
+  // Currency options (Settings → Currency)
+  static const List<({String code, String symbol, String label})>
+      currencyOptions = [
+    (code: 'INR', symbol: '₹', label: 'Indian Rupee'),
+    (code: 'USD', symbol: '\$', label: 'US Dollar'),
+    (code: 'EUR', symbol: '€', label: 'Euro'),
+    (code: 'GBP', symbol: '£', label: 'British Pound'),
+  ];
+
+  // Date format options (Settings → Date Format)
+  static const List<({String pattern, String label})> dateFormatOptions = [
+    (pattern: 'dd/MM/yyyy', label: 'DD/MM/YYYY'),
+    (pattern: 'MM/dd/yyyy', label: 'MM/DD/YYYY'),
+  ];
+
   // Defaults
   static const String defaultCurrencyCode = 'INR';
   static const String defaultCurrencySymbol = '₹';
