@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -8,6 +10,8 @@ import '../../../../theme/app_colors.dart';
 import '../../../../theme/app_spacing.dart';
 import '../../../../theme/app_text_styles.dart';
 import '../../../../utils/date_formatter.dart';
+import '../../../photo/presentation/providers/photo_providers.dart';
+import '../../../photo/presentation/widgets/add_photo_sheet.dart';
 import '../../domain/entities/stage_entity.dart';
 import '../providers/stage_providers.dart';
 
@@ -283,6 +287,14 @@ class _DetailBodyState extends ConsumerState<_DetailBody> {
 
           const SizedBox(height: AppSpacing.lg),
 
+          // Progress photos
+          _StagePhotosSection(
+            projectId: widget.projectId,
+            stageId: stage.id,
+          ),
+
+          const SizedBox(height: AppSpacing.lg),
+
           // Quick actions
           Row(
             children: [
@@ -342,6 +354,112 @@ class _DetailBodyState extends ConsumerState<_DetailBody> {
         StageStatus.completed => 'Completed',
         StageStatus.onHold => 'On Hold',
       };
+}
+
+class _StagePhotosSection extends ConsumerWidget {
+  const _StagePhotosSection({
+    required this.projectId,
+    required this.stageId,
+  });
+
+  final int projectId;
+  final int stageId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final photos = ref
+            .watch(photosNotifierProvider(projectId))
+            .valueOrNull
+            ?.photos
+            .where((p) => p.stageId == stageId)
+            .toList() ??
+        const [];
+
+    return _SectionCard(
+      title: 'Progress Photos',
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (photos.isEmpty)
+            Padding(
+              padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+              child: Text(
+                'No photos for this stage yet.',
+                style: AppTextStyles.bodySmall.copyWith(
+                  color: LightThemeColors.textTertiary,
+                ),
+              ),
+            )
+          else ...[
+            // Only shown once at least one photo exists.
+            Align(
+              alignment: Alignment.centerRight,
+              child: TextButton.icon(
+                onPressed: () => context.pushNamed(
+                  AppRouteNames.photos,
+                  pathParameters: {'id': projectId.toString()},
+                ),
+                icon: const Icon(Icons.collections_outlined, size: 18),
+                label: const Text('View All'),
+                style: TextButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.sm,
+                  ),
+                  minimumSize: Size.zero,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+              ),
+            ),
+            const SizedBox(height: AppSpacing.xs),
+            SizedBox(
+              height: 80,
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                itemCount: photos.length,
+                separatorBuilder: (_, __) =>
+                    const SizedBox(width: AppSpacing.xs),
+                itemBuilder: (context, i) {
+                  final photo = photos[i];
+                  final file = File(photo.thumbnailPath ?? photo.filePath);
+                  return GestureDetector(
+                    onTap: () => context.pushNamed(
+                      AppRouteNames.photoDetail,
+                      pathParameters: {
+                        'id': projectId.toString(),
+                        'photoId': photo.id.toString(),
+                      },
+                      queryParameters: {'stageId': stageId.toString()},
+                    ),
+                    child: ClipRRect(
+                      borderRadius:
+                          BorderRadius.circular(AppDimensions.radiusSm),
+                      child: SizedBox(
+                        width: 80,
+                        height: 80,
+                        child: file.existsSync()
+                            ? Image.file(file, fit: BoxFit.cover)
+                            : Container(color: AppColors.neutral200),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
+          const SizedBox(height: AppSpacing.sm),
+          AppOutlineButton(
+            label: 'Add Progress Photo',
+            icon: Icons.add_a_photo_outlined,
+            onPressed: () => showAddPhotoSheet(
+              context,
+              projectId: projectId,
+              presetStageId: stageId,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class _SectionCard extends StatelessWidget {

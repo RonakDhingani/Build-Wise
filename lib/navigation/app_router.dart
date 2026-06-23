@@ -124,7 +124,14 @@ final appRouter = GoRouter(
                 final id = int.parse(state.pathParameters['id']!);
                 final photoId =
                     int.parse(state.pathParameters['photoId']!);
-                return PhotoDetailScreen(projectId: id, photoId: photoId);
+                final stageId = state.uri.queryParameters['stageId'] != null
+                    ? int.tryParse(state.uri.queryParameters['stageId']!)
+                    : null;
+                return PhotoDetailScreen(
+                  projectId: id,
+                  photoId: photoId,
+                  stageId: stageId,
+                );
               },
             ),
           ],

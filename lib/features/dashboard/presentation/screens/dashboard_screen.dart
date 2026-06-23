@@ -438,6 +438,17 @@ class _QuickActions extends StatelessWidget {
             ),
           ),
         ),
+        const SizedBox(width: AppSpacing.md),
+        Expanded(
+          child: _ActionButton(
+            icon: Icons.photo_camera_outlined,
+            label: 'Photos',
+            onTap: () => context.pushNamed(
+              AppRouteNames.photos,
+              pathParameters: {'id': projectId.toString()},
+            ),
+          ),
+        ),
       ],
     );
   }
