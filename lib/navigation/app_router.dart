@@ -12,6 +12,7 @@ import '../features/expense/presentation/screens/add_edit_expense_screen.dart';
 import '../features/material/presentation/screens/material_screen.dart';
 import '../features/material/presentation/screens/material_detail_screen.dart';
 import '../features/material/presentation/screens/add_edit_material_screen.dart';
+import '../features/report/domain/report_type.dart';
 import '../features/report/presentation/screens/reports_screen.dart';
 import '../features/report/presentation/screens/pdf_viewer_screen.dart';
 import '../features/settings/presentation/screens/settings_screen.dart';
@@ -300,7 +301,9 @@ final appRouter = GoRouter(
                   parentNavigatorKey: _rootNavigatorKey,
                   builder: (context, state) {
                     final id = int.parse(state.pathParameters['id']!);
-                    return PdfViewerScreen(projectId: id);
+                    final type = ReportType.fromId(
+                        state.uri.queryParameters['type']);
+                    return PdfViewerScreen(projectId: id, reportType: type);
                   },
                 ),
               ],

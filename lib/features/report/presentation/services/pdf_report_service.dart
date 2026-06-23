@@ -6,6 +6,7 @@ import 'package:pdf/widgets.dart' as pw;
 import '../../../../utils/date_formatter.dart';
 import '../../../material/domain/entities/material_entity.dart';
 import '../../data/report_data.dart';
+import '../../domain/report_type.dart';
 
 abstract class PdfReportService {
   static const _primary = PdfColor.fromInt(0xFF1E4D8C);
@@ -18,7 +19,10 @@ abstract class PdfReportService {
   static const _border = PdfColor.fromInt(0xFFE8E8F0);
   static const _bgLight = PdfColor.fromInt(0xFFF4F4F8);
 
-  static Future<Uint8List> generate(ReportData data) async {
+  static Future<Uint8List> generate(
+    ReportData data, {
+    ReportType type = ReportType.full,
+  }) async {
     final doc = pw.Document();
 
     doc.addPage(pw.MultiPage(
@@ -27,24 +31,61 @@ abstract class PdfReportService {
       header: (_) => _buildPageHeader(data),
       footer: (ctx) => _buildPageFooter(ctx, data),
       build: (ctx) => [
-        _buildCoverSection(data),
+        _buildCoverSection(data, type),
         pw.SizedBox(height: 20),
-        _buildBudgetSection(data),
-        pw.SizedBox(height: 20),
-        if (data.stages.isNotEmpty) ...[
-          _buildStagesSection(data),
-          pw.SizedBox(height: 20),
-        ],
-        if (data.expenses.isNotEmpty) ...[
-          _buildExpensesSection(data),
-          pw.SizedBox(height: 20),
-        ],
-        if (data.materials.isNotEmpty)
-          _buildMaterialsSection(data),
+        ..._sectionsFor(type, data),
       ],
     ));
 
     return doc.save();
+  }
+
+  /// Sections rendered for each report kind. [ReportType.full] keeps the
+  /// original unified layout; the scoped kinds render only their section.
+  static List<pw.Widget> _sectionsFor(ReportType type, ReportData data) {
+    final sections = <pw.Widget>[];
+
+    void add(bool when, pw.Widget Function() build) {
+      if (!when) return;
+      if (sections.isNotEmpty) sections.add(pw.SizedBox(height: 20));
+      sections.add(build());
+    }
+
+    switch (type) {
+      case ReportType.full:
+        add(true, () => _buildBudgetSection(data));
+        add(data.stages.isNotEmpty, () => _buildStagesSection(data));
+        add(data.expenses.isNotEmpty, () => _buildExpensesSection(data));
+        add(data.materials.isNotEmpty, () => _buildMaterialsSection(data));
+      case ReportType.budget:
+        add(true, () => _buildBudgetSection(data));
+      case ReportType.expense:
+        add(true, () => _buildBudgetSection(data));
+        add(data.expenses.isNotEmpty, () => _buildExpensesSection(data));
+      case ReportType.material:
+        add(data.materials.isNotEmpty, () => _buildMaterialsSection(data));
+      case ReportType.progress:
+        add(data.stages.isNotEmpty, () => _buildStagesSection(data));
+    }
+
+    if (sections.isEmpty) {
+      sections.add(_emptyNotice(type));
+    }
+    return sections;
+  }
+
+  static pw.Widget _emptyNotice(ReportType type) {
+    return pw.Container(
+      padding: const pw.EdgeInsets.all(16),
+      decoration: pw.BoxDecoration(
+        color: _bgLight,
+        borderRadius: pw.BorderRadius.circular(6),
+      ),
+      child: pw.Text(
+        'No data available for this report yet.',
+        style: pw.TextStyle(color: _textSecondary, fontSize: 11),
+      ),
+    );
   }
 
   static pw.Widget _buildPageHeader(ReportData data) {
@@ -96,7 +137,7 @@ abstract class PdfReportService {
     );
   }
 
-  static pw.Widget _buildCoverSection(ReportData data) {
+  static pw.Widget _buildCoverSection(ReportData data, ReportType type) {
     final project = data.project;
     return pw.Container(
       padding: const pw.EdgeInsets.all(20),
@@ -108,7 +149,7 @@ abstract class PdfReportService {
         crossAxisAlignment: pw.CrossAxisAlignment.start,
         children: [
           pw.Text(
-            'PROJECT REPORT',
+            type.coverTitle,
             style: pw.TextStyle(
               color: PdfColors.white,
               fontSize: 10,

@@ -11,6 +11,7 @@ import '../../../../theme/app_text_styles.dart';
 import '../../../../utils/analytics.dart';
 import '../../../../utils/date_formatter.dart';
 import '../../data/report_data.dart';
+import '../../domain/report_type.dart';
 import '../providers/report_providers.dart';
 
 enum _TrendRange { d30, d90, m6, y1 }
@@ -119,28 +120,28 @@ class _BodyState extends State<_Body> {
                 color: LightThemeColors.primary,
                 title: 'Budget Report',
                 subtitle: 'Overview of budget, spent and remaining',
-                onTap: () => _openPdf(context),
+                onTap: () => _openPdf(context, ReportType.budget),
               ),
               _ReportRow(
                 icon: Icons.delete_outline_rounded,
                 color: const Color(0xFF8B5CF6),
                 title: 'Expense Report',
                 subtitle: 'Detailed list of all expenses',
-                onTap: () => _openPdf(context),
+                onTap: () => _openPdf(context, ReportType.expense),
               ),
               _ReportRow(
                 icon: Icons.layers_outlined,
                 color: AppColors.gold400,
                 title: 'Material Report',
                 subtitle: 'Summary of all materials used',
-                onTap: () => _openPdf(context),
+                onTap: () => _openPdf(context, ReportType.material),
               ),
               _ReportRow(
                 icon: Icons.insights_rounded,
                 color: AppColors.success500,
                 title: 'Progress Report',
                 subtitle: 'Project progress and stage wise report',
-                onTap: () => _openPdf(context),
+                onTap: () => _openPdf(context, ReportType.progress),
               ),
               const SizedBox(height: AppSpacing.xl),
 
@@ -195,16 +196,17 @@ class _BodyState extends State<_Body> {
         ),
         AppBottomButton(
           label: 'Export Report (PDF)',
-          onPressed: () => _openPdf(context),
+          onPressed: () => _openPdf(context, ReportType.full),
         ),
       ],
     );
   }
 
-  void _openPdf(BuildContext context) {
+  void _openPdf(BuildContext context, ReportType type) {
     context.pushNamed(
       AppRouteNames.pdfViewer,
       pathParameters: {'id': widget.projectId.toString()},
+      queryParameters: {'type': type.id},
     );
   }
 }

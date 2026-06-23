@@ -3,13 +3,19 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:printing/printing.dart';
 
 import '../../../../shared/widgets/index.dart';
+import '../../domain/report_type.dart';
 import '../providers/report_providers.dart';
 import '../services/pdf_report_service.dart';
 
 class PdfViewerScreen extends ConsumerWidget {
-  const PdfViewerScreen({super.key, required this.projectId});
+  const PdfViewerScreen({
+    super.key,
+    required this.projectId,
+    this.reportType = ReportType.full,
+  });
 
   final int projectId;
+  final ReportType reportType;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -17,7 +23,7 @@ class PdfViewerScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Report'),
+        title: Text(reportType.appBarTitle),
         centerTitle: false,
       ),
       body: async.when(
@@ -27,12 +33,13 @@ class PdfViewerScreen extends ConsumerWidget {
           onRetry: () => ref.invalidate(reportDataProvider(projectId)),
         ),
         data: (reportData) => PdfPreview(
-          build: (_) => PdfReportService.generate(reportData),
+          build: (_) =>
+              PdfReportService.generate(reportData, type: reportType),
           canChangeOrientation: false,
           canChangePageFormat: false,
           canDebug: false,
           pdfFileName:
-              '${reportData.project.name.replaceAll(' ', '_')}_Report.pdf',
+              '${reportData.project.name.replaceAll(' ', '_')}_${reportType.fileSuffix}.pdf',
         ),
       ),
     );
