@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Contact Us — Build Wise</title>
+  <meta name="description" content="Get support, request features, or report bugs for the Build Wise construction budget app." />
+  <meta name="theme-color" content="#1E4E8C" />
+  <link rel="canonical" href="./contact.html" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Contact Us — Build Wise" />
+  <meta property="og:description" content="Support, feature requests, and bug reports for Build Wise." />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%231E4E8C'/%3E%3Cpath d='M16 44V28l16-10 16 10v16H36V34h-8v10z' fill='%23fff'/%3E%3Crect x='29' y='40' width='6' height='4' fill='%23F59E0B'/%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+  <header class="site-header" id="site-header">
+    <div class="container nav">
+      <a class="brand" href="index.html" aria-label="Build Wise home">
+        <svg class="logo" viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="14" fill="#1E4E8C"/><path d="M16 44V28l16-10 16 10v16H36V34h-8v10z" fill="#fff"/><rect x="29" y="40" width="6" height="4" fill="#F59E0B"/></svg>
+        <span>Build<b>Wise</b></span>
+      </a>
+      <button class="nav__toggle" aria-label="Toggle menu" aria-expanded="false" aria-controls="nav-links"><span></span><span></span><span></span></button>
+      <ul class="nav__links" id="nav-links">
+        <li><a href="index.html#features">Features</a></li>
+        <li><a href="index.html#screenshots">Screenshots</a></li>
+        <li><a href="index.html#faq">FAQ</a></li>
+        <li><a href="contact.html">Contact</a></li>
+        <li class="nav__cta"><a class="btn btn-primary" href="index.html#download">Get the App</a></li>
+      </ul>
+    </div>
+  </header>
+
+  <section class="page-hero">
+    <div class="container">
+      <h1>Contact Us</h1>
+      <p>We'd love to hear from you — support, ideas, or issues.</p>
+    </div>
+  </section>
+
+  <main class="section">
+    <div class="container">
+
+      <!-- Contact channels -->
+      <div class="grid contact__grid" style="margin-bottom:40px">
+        <article class="card contact-card reveal">
+          <div class="feature__icon">✉️</div>
+          <h3>Support Email</h3>
+          <p>General help and questions about the app.</p>
+          <a href="mailto:support@buildwise.app">support@buildwise.app</a>
+        </article>
+        <article class="card contact-card reveal">
+          <div class="feature__icon">💡</div>
+          <h3>Feature Requests</h3>
+          <p>Tell us what would make Build Wise better.</p>
+          <a href="mailto:support@buildwise.app?subject=Feature%20Request">Send a feature request</a>
+        </article>
+        <article class="card contact-card reveal">
+          <div class="feature__icon">🐞</div>
+          <h3>Bug Reports</h3>
+          <p>Found a problem? Let us know the details.</p>
+          <a href="mailto:support@buildwise.app?subject=Bug%20Report">Report a bug</a>
+        </article>
+      </div>
+
+      <!-- Contact form (no backend; builds a mailto draft) -->
+      <div class="legal">
+        <form class="form reveal" id="contact-form" novalidate>
+          <h2 style="margin-top:0">Send us a message</h2>
+          <div class="field">
+            <label for="cf-name">Name</label>
+            <input type="text" id="cf-name" name="name" autocomplete="name" required />
+          </div>
+          <div class="field">
+            <label for="cf-email">Email</label>
+            <input type="email" id="cf-email" name="email" autocomplete="email" required />
+          </div>
+          <div class="field">
+            <label for="cf-subject">Subject</label>
+            <input type="text" id="cf-subject" name="subject" placeholder="e.g. Feature Request, Bug Report" />
+          </div>
+          <div class="field">
+            <label for="cf-message">Message</label>
+            <textarea id="cf-message" name="message" required></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary btn-block">Send Message</button>
+          <p class="form__note">This opens your email app with the message pre-filled — no data is sent to any server.</p>
+          <p class="form__status" id="form-status" role="status" aria-live="polite"></p>
+        </form>
+      </div>
+
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer__bottom">
+        <span>© <span data-year>2026</span> Build Wise. All rights reserved.</span>
+        <span>
+          <a href="privacy-policy.html">Privacy</a> ·
+          <a href="terms-and-conditions.html">Terms</a> ·
+          <a href="contact.html">Contact</a> · App version 1.0.0
+        </span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/main.js"></script>
+</body>
+</html>

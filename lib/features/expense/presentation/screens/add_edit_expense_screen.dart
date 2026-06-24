@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../constants/app_strings.dart';
+import '../../../../core/result/result.dart';
 import '../../../../shared/widgets/index.dart';
 import '../../../../theme/app_colors.dart';
 import '../../../../theme/app_spacing.dart';
@@ -41,6 +42,10 @@ class _AddEditExpenseScreenState
   bool _isSaving = false;
 
   ExpenseEntity? _existing;
+
+  // Sentinel dropdown value for the "Add New Category" action. Real category
+  // ids are auto-increment (>= 1), so -1 never collides.
+  static const int _addNewCategoryValue = -1;
 
   @override
   void initState() {
@@ -91,6 +96,7 @@ class _AddEditExpenseScreenState
             : AppStrings.addExpenseTitle,
       ),
       body: categoriesAsync.when(
+        skipLoadingOnReload: true,
         loading: () => const AppLoadingWidget(),
         error: (_, __) => const AppErrorState(message: 'Failed to load categories.'),
         data: (categories) => Form(
@@ -115,13 +121,37 @@ class _AddEditExpenseScreenState
                 label: AppStrings.category,
                 value: _selectedCategoryId,
                 hint: 'Select category',
-                items: categories
-                    .map((c) => DropdownMenuItem<int>(
-                          value: c.id,
-                          child: Text(c.name),
-                        ))
-                    .toList(),
-                onChanged: (v) => setState(() => _selectedCategoryId = v),
+                items: [
+                  ...categories.map((c) => DropdownMenuItem<int>(
+                        value: c.id,
+                        child: Text(c.name),
+                      )),
+                  DropdownMenuItem<int>(
+                    value: _addNewCategoryValue,
+                    child: Row(
+                      children: [
+                        Icon(Icons.add_rounded,
+                            size: AppDimensions.iconSm,
+                            color: LightThemeColors.primary),
+                        const SizedBox(width: AppSpacing.sm),
+                        Text(
+                          'Add New Category',
+                          style: TextStyle(
+                            color: LightThemeColors.primary,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+                onChanged: (v) {
+                  if (v == _addNewCategoryValue) {
+                    _showQuickAddCategory(categories);
+                    return;
+                  }
+                  setState(() => _selectedCategoryId = v);
+                },
                 validator: (v) =>
                     v == null ? AppStrings.requiredField : null,
               ),
@@ -214,6 +244,44 @@ class _AddEditExpenseScreenState
     );
   }
 
+  /// Quick Add Category from the dropdown. Creates the category locally,
+  /// refreshes the list, auto-selects it, and keeps the user on this screen.
+  Future<void> _showQuickAddCategory(
+    List<ExpenseCategoryEntity> existing,
+  ) async {
+    final name = await AppBottomSheet.show<String>(
+      context,
+      title: 'Add Expense Category',
+      child: _AddCategorySheet(
+        existingNames: existing.map((c) => c.name.toLowerCase().trim()).toSet(),
+      ),
+    );
+    if (name == null || !mounted) return;
+
+    final result =
+        await ref.read(createCategoryUseCaseProvider).execute(name);
+    if (!mounted) return;
+
+    await result.when(
+      success: (created) async {
+        // Refresh the form dropdown and the Settings list from Isar.
+        ref.invalidate(expenseCategoriesProvider);
+        ref.invalidate(categoriesNotifierProvider);
+        await ref.read(expenseCategoriesProvider.future);
+        if (!mounted) return;
+        setState(() => _selectedCategoryId = created.id);
+      },
+      failure: (f) async {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(f.message),
+            backgroundColor: AppColors.error500,
+          ),
+        );
+      },
+    );
+  }
+
   Future<void> _onSave() async {
     if (!(_formKey.currentState?.validate() ?? false)) return;
     if (_selectedCategoryId == null) return;
@@ -283,5 +351,96 @@ class _AddEditExpenseScreenState
     } finally {
       if (mounted) setState(() => _isSaving = false);
     }
+  }
+}
+
+/// Quick Add Category bottom sheet. Collects + validates a name (non-empty,
+/// non-duplicate) and returns the trimmed value via `Navigator.pop`.
+class _AddCategorySheet extends StatefulWidget {
+  const _AddCategorySheet({required this.existingNames});
+
+  /// Lower-cased, trimmed names of existing categories for duplicate checks.
+  final Set<String> existingNames;
+
+  @override
+  State<_AddCategorySheet> createState() => _AddCategorySheetState();
+}
+
+class _AddCategorySheetState extends State<_AddCategorySheet> {
+  final _ctrl = TextEditingController();
+  String? _error;
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  void _save() {
+    final name = _ctrl.text.trim();
+    if (name.isEmpty) {
+      setState(() => _error = 'Category name is required');
+      return;
+    }
+    if (widget.existingNames.contains(name.toLowerCase())) {
+      setState(() => _error = 'This category already exists');
+      return;
+    }
+    Navigator.of(context).pop(name);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.lg,
+        AppSpacing.sm,
+        AppSpacing.lg,
+        AppSpacing.xl,
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          AppTextField(
+            label: 'Category Name',
+            hint: 'e.g. Solar Panels',
+            controller: _ctrl,
+            autofocus: true,
+            maxLength: 50,
+            textCapitalization: TextCapitalization.words,
+            onChanged: (_) {
+              if (_error != null) setState(() => _error = null);
+            },
+            onSubmitted: (_) => _save(),
+          ),
+          if (_error != null) ...[
+            const SizedBox(height: AppSpacing.xs),
+            Text(
+              _error!,
+              style: const TextStyle(color: AppColors.error500, fontSize: 12),
+            ),
+          ],
+          const SizedBox(height: AppSpacing.lg),
+          Row(
+            children: [
+              Expanded(
+                child: AppOutlineButton(
+                  label: AppStrings.cancel,
+                  onPressed: () => Navigator.of(context).pop(),
+                ),
+              ),
+              const SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: AppPrimaryButton(
+                  label: AppStrings.save,
+                  onPressed: _save,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
   }
 }

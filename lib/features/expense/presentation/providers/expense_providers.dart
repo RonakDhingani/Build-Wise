@@ -70,11 +70,12 @@ final expensesNotifierProvider =
 );
 
 // Standalone categories provider for forms that load independently
+// Derives from categoriesNotifierProvider (single source of truth) so any
+// add/edit/delete — from Settings or quick-add — reflects in the dropdown
+// immediately, without a separate fetch that can drift out of sync.
 final expenseCategoriesProvider =
-    FutureProvider<List<ExpenseCategoryEntity>>((ref) async {
-  final useCase = ref.read(getCategoriesUseCaseProvider);
-  final result = await useCase.execute();
-  return result.when(success: (d) => d, failure: (_) => []);
+    FutureProvider<List<ExpenseCategoryEntity>>((ref) {
+  return ref.watch(categoriesNotifierProvider.future);
 });
 
 // Minimal stage info for the stage-link dropdown in the expense form

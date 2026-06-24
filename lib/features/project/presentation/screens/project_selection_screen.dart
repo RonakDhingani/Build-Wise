@@ -1,3 +1,4 @@
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -13,6 +14,7 @@ import '../../../../features/onboarding/presentation/walkthrough_step.dart';
 import '../../../../shared/widgets/index.dart';
 import '../../../../theme/app_colors.dart';
 import '../../../../theme/app_spacing.dart';
+import '../../../../theme/app_text_styles.dart';
 import '../../domain/entities/project_entity.dart';
 import '../notifiers/project_notifier.dart';
 import '../providers/project_providers.dart';
@@ -84,6 +86,27 @@ class ProjectSelectionScreen extends ConsumerWidget {
   }
 }
 
+/// Pick a BuildWise backup (.zip) and open the import preview. Same flow as
+/// Settings → Data Management → Import, surfaced from Home for discoverability.
+Future<void> _importProject(BuildContext context) async {
+  try {
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['zip'],
+      withData: false,
+    );
+    final path = result?.files.single.path;
+    if (path == null || !context.mounted) return;
+    context.pushNamed(AppRouteNames.importProject, extra: path);
+  } catch (_) {
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Could not open the file picker.')),
+      );
+    }
+  }
+}
+
 class _Body extends ConsumerStatefulWidget {
   const _Body({required this.state});
   final ProjectsState state;
@@ -103,6 +126,9 @@ class _BodyState extends ConsumerState<_Body> {
           onChanged: (q) =>
               ref.read(projectsNotifierProvider.notifier).updateSearch(q),
         ),
+        // Import area shown above the listing when projects exist.
+        if (filtered.isNotEmpty)
+          _ImportProjectCard(onTap: () => _importProject(context)),
         Expanded(
           child: filtered.isEmpty
               ? _empty(context, widget.state)
@@ -138,11 +164,94 @@ class _BodyState extends ConsumerState<_Body> {
     return AppEmptyState(
       title: AppStrings.noProjects,
       subtitle: AppStrings.noProjectsSubtitle,
-      action: AppPrimaryButton(
-        label: AppStrings.createProject,
-        icon: Icons.add,
-        width: 200,
-        onPressed: () => context.pushNamed(AppRouteNames.createProject),
+      action: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          AppPrimaryButton(
+            label: AppStrings.createProject,
+            icon: Icons.add,
+            width: 220,
+            onPressed: () => context.pushNamed(AppRouteNames.createProject),
+          ),
+          const SizedBox(height: AppSpacing.md),
+          AppOutlineButton(
+            label: 'Import Project',
+            icon: Icons.file_download_outlined,
+            width: 220,
+            onPressed: () => _importProject(context),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Tappable card surfacing the import action above the project list.
+class _ImportProjectCard extends StatelessWidget {
+  const _ImportProjectCard({required this.onTap});
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.pageHorizontal,
+        AppSpacing.md,
+        AppSpacing.pageHorizontal,
+        0,
+      ),
+      child: Material(
+        color: LightThemeColors.surface,
+        borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
+          child: Container(
+            padding: const EdgeInsets.all(AppSpacing.md),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
+              border: Border.all(color: LightThemeColors.border),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: AppDimensions.avatarSm,
+                  height: AppDimensions.avatarSm,
+                  decoration: BoxDecoration(
+                    color: LightThemeColors.primary.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(AppDimensions.radiusSm),
+                  ),
+                  child: Icon(
+                    Icons.file_download_outlined,
+                    color: LightThemeColors.primary,
+                    size: AppDimensions.iconSm,
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.md),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Import Project', style: AppTextStyles.titleSmall),
+                      const SizedBox(height: 2),
+                      Text(
+                        'Restore from a BuildWise backup (.zip)',
+                        style: AppTextStyles.bodySmall.copyWith(
+                          color: LightThemeColors.textSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Icon(
+                  Icons.chevron_right_rounded,
+                  color: LightThemeColors.textTertiary,
+                  size: AppDimensions.iconMd,
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }

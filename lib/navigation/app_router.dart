@@ -53,6 +53,16 @@ final appRouter = GoRouter(
       name: AppRouteNames.splash,
       builder: (context, state) => const SplashScreen(),
     ),
+    // Top-level import entry point (Home screen "Import Project" action). No
+    // active project context needed; reuses the Settings import preview screen.
+    GoRoute(
+      path: '/import-project',
+      name: AppRouteNames.importProject,
+      builder: (context, state) {
+        final zipPath = state.extra as String? ?? '';
+        return ImportPreviewScreen(projectId: 0, zipPath: zipPath);
+      },
+    ),
     GoRoute(
       path: AppRoutePaths.projects,
       name: AppRouteNames.projects,

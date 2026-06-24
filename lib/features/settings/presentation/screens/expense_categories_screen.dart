@@ -37,7 +37,12 @@ class ExpenseCategoriesScreen extends ConsumerWidget {
             );
           }
           return ListView(
-            padding: const EdgeInsets.symmetric(vertical: AppSpacing.xl),
+            // Extra bottom padding so the last row's delete button is not
+            // covered by the FAB.
+            padding: const EdgeInsets.only(
+              top: AppSpacing.xl,
+              bottom: AppSpacing.xxxl + AppDimensions.buttonHeightLg,
+            ),
             children: [
               SettingsCard(
                 children: [

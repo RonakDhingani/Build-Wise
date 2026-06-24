@@ -129,6 +129,45 @@ class AppTheme {
             borderRadius: BorderRadius.circular(AppDimensions.radiusFull),
           ),
         ),
+        // Popup / overflow menus open directly under their trigger, rounded.
+        popupMenuTheme: PopupMenuThemeData(
+          color: LightThemeColors.surface,
+          elevation: 3,
+          position: PopupMenuPosition.under,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
+          ),
+          textStyle: AppTextStyles.bodyMedium,
+        ),
+        // MenuAnchor menus (AppDropdownField) — rounded surface, opens below.
+        menuTheme: MenuThemeData(
+          style: MenuStyle(
+            elevation: const WidgetStatePropertyAll(3),
+            backgroundColor:
+                const WidgetStatePropertyAll(LightThemeColors.surface),
+            padding: const WidgetStatePropertyAll(
+              EdgeInsets.symmetric(vertical: AppSpacing.xs),
+            ),
+            shape: WidgetStatePropertyAll(
+              RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
+              ),
+            ),
+          ),
+        ),
+        // Material 3 DropdownMenu (where used) opens below + matches field width.
+        dropdownMenuTheme: DropdownMenuThemeData(
+          menuStyle: MenuStyle(
+            elevation: const WidgetStatePropertyAll(3),
+            backgroundColor:
+                const WidgetStatePropertyAll(LightThemeColors.surface),
+            shape: WidgetStatePropertyAll(
+              RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
+              ),
+            ),
+          ),
+        ),
       );
 
   static ThemeData get dark => light;
