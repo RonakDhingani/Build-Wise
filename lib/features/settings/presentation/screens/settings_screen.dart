@@ -88,18 +88,11 @@ class SettingsScreen extends ConsumerWidget {
               title: 'Data Management',
               children: [
                 SettingsTile(
-                  icon: Icons.upload_outlined,
+                  icon: Icons.backup_outlined,
                   iconColor: AppColors.navy400,
-                  title: 'Export Data',
-                  subtitle: 'Export your projects and data as backup',
-                  onTap: () => _comingSoon(context, 'Export Data'),
-                ),
-                SettingsTile(
-                  icon: Icons.download_outlined,
-                  iconColor: AppColors.success500,
-                  title: 'Import Data',
-                  subtitle: 'Import and restore data from backup file',
-                  onTap: () => _comingSoon(context, 'Import Data'),
+                  title: 'Backup & Restore',
+                  subtitle: 'Export, import and restore your data offline',
+                  onTap: () => _go(context, AppRouteNames.dataManagement),
                 ),
                 SettingsTile(
                   icon: Icons.delete_outline_rounded,

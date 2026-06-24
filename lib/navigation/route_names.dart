@@ -32,6 +32,8 @@ abstract class AppRouteNames {
 
   // Settings sub-screens
   static const String manageProjects = 'manage-projects';
+  static const String dataManagement = 'data-management';
+  static const String importPreview = 'import-preview';
   static const String defaultProject = 'default-project';
   static const String expenseCategories = 'expense-categories';
   static const String currency = 'currency';

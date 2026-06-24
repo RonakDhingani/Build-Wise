@@ -22,6 +22,8 @@ import '../features/report/presentation/screens/reports_screen.dart';
 import '../features/report/presentation/screens/pdf_viewer_screen.dart';
 import '../features/settings/presentation/screens/settings_screen.dart';
 import '../features/settings/presentation/screens/manage_projects_screen.dart';
+import '../features/backup/presentation/screens/data_management_screen.dart';
+import '../features/backup/presentation/screens/import_preview_screen.dart';
 import '../features/settings/presentation/screens/default_project_screen.dart';
 import '../features/settings/presentation/screens/expense_categories_screen.dart';
 import '../features/settings/presentation/screens/currency_screen.dart';
@@ -145,6 +147,25 @@ final appRouter = GoRouter(
           path: ':id/manage-projects',
           name: AppRouteNames.manageProjects,
           builder: (context, state) => const ManageProjectsScreen(),
+        ),
+        GoRoute(
+          path: ':id/data-management',
+          name: AppRouteNames.dataManagement,
+          builder: (context, state) {
+            final id = int.parse(state.pathParameters['id']!);
+            return DataManagementScreen(projectId: id);
+          },
+          routes: [
+            GoRoute(
+              path: 'import-preview',
+              name: AppRouteNames.importPreview,
+              builder: (context, state) {
+                final id = int.parse(state.pathParameters['id']!);
+                final zipPath = state.extra as String? ?? '';
+                return ImportPreviewScreen(projectId: id, zipPath: zipPath);
+              },
+            ),
+          ],
         ),
         GoRoute(
           path: ':id/default-project',

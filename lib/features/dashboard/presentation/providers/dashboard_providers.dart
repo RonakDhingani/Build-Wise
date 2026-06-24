@@ -49,6 +49,9 @@ final dashboardProvider =
     FutureProvider.family<DashboardData, int>((ref, projectId) async {
   ref.watch(expensesNotifierProvider(projectId));
   ref.watch(stagesNotifierProvider(projectId));
+  // Rebuild when the project itself changes (budget edit, expense/material
+  // refresh) so Budget Overview reflects fresh budget + spent values.
+  ref.watch(projectsNotifierProvider);
 
   final projectUseCase = ref.read(getProjectByIdUseCaseProvider);
   final expensesUseCase = ref.read(getExpensesUseCaseProvider);

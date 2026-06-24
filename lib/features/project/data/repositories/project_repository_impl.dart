@@ -169,6 +169,21 @@ class ProjectRepositoryImpl implements ProjectRepository {
       totalSpent = expenses.fold(0.0, (sum, e) => sum + e.amount);
     } catch (_) {}
 
+    // Material purchases also count toward spent. totalCost mirrors
+    // MaterialEntity.totalCost: quantityPurchased * costPerUnit (0 if no cost).
+    try {
+      final materials = await _isar.materialModels
+          .filter()
+          .projectIdEqualTo(model.id)
+          .findAll();
+      totalSpent += materials.fold(
+        0.0,
+        (sum, m) => sum + (m.costPerUnit != null
+            ? m.quantityPurchased * m.costPerUnit!
+            : 0.0),
+      );
+    } catch (_) {}
+
     double completionPct = 0.0;
     try {
       final stages = await _isar.stageModels
