@@ -124,7 +124,7 @@ class _BodyState extends State<_Body> {
               ),
               _ReportRow(
                 icon: Icons.delete_outline_rounded,
-                color: const Color(0xFF8B5CF6),
+                color: AppColors.violet,
                 title: 'Expense Report',
                 subtitle: 'Detailed list of all expenses',
                 onTap: () => _openPdf(context, ReportType.expense),

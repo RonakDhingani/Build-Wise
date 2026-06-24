@@ -53,7 +53,7 @@ class _Fallback extends StatelessWidget {
           const SizedBox(height: 16),
           RichText(
             text: TextSpan(
-              style: AppTextStyles.displaySmall.copyWith(color: Colors.white),
+              style: AppTextStyles.displaySmall.copyWith(color: AppColors.white),
               children: [
                 const TextSpan(text: 'Build'),
                 TextSpan(
@@ -66,7 +66,7 @@ class _Fallback extends StatelessWidget {
           Text(
             'PLAN • TRACK • BUILD WISE',
             style: AppTextStyles.labelMedium.copyWith(
-              color: Colors.white70,
+              color: AppColors.white.withValues(alpha: 0.7),
               letterSpacing: 1.5,
             ),
           ),

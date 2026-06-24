@@ -28,11 +28,11 @@ const List<Color> kChartPalette = [
   AppColors.gold400,
   AppColors.success500,
   AppColors.info500,
-  Color(0xFF8B5CF6), // purple
-  Color(0xFF26A69A), // teal
+  AppColors.violet,
+  AppColors.teal,
   AppColors.error500,
-  Color(0xFFEC407A), // pink
-  Color(0xFF8D6E63), // brown
+  AppColors.pink,
+  AppColors.brown,
   AppColors.navy300,
 ];
 

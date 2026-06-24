@@ -23,13 +23,13 @@ class ContactSupportScreen extends StatelessWidget {
               width: AppDimensions.avatarLg,
               height: AppDimensions.avatarLg,
               decoration: BoxDecoration(
-                color: const Color(0xFF8B5CF6).withValues(alpha: 0.12),
+                color: AppColors.violet.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(AppDimensions.radiusXl),
               ),
               child: const Icon(
                 Icons.headset_mic_outlined,
                 size: AppDimensions.iconLg,
-                color: Color(0xFF8B5CF6),
+                color: AppColors.violet,
               ),
             ),
           ),

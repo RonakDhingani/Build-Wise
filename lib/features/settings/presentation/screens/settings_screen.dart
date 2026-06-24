@@ -8,6 +8,7 @@ import '../../../../shared/widgets/index.dart';
 import '../../../../theme/app_colors.dart';
 import '../../../../theme/app_spacing.dart';
 import '../../../../theme/app_text_styles.dart';
+import '../../../onboarding/presentation/walkthrough_controller.dart';
 import '../../domain/entities/app_settings_entity.dart';
 import '../providers/settings_providers.dart';
 import '../widgets/settings_group.dart';
@@ -59,7 +60,7 @@ class SettingsScreen extends ConsumerWidget {
               children: [
                 SettingsTile(
                   icon: Icons.local_offer_outlined,
-                  iconColor: const Color(0xFF8B5CF6),
+                  iconColor: AppColors.violet,
                   title: 'Expense Categories',
                   subtitle: 'Add, edit, delete or reorder categories',
                   onTap: () => _go(context, AppRouteNames.expenseCategories),
@@ -133,7 +134,7 @@ class SettingsScreen extends ConsumerWidget {
                 ),
                 SettingsTile(
                   icon: Icons.palette_outlined,
-                  iconColor: const Color(0xFF8B5CF6),
+                  iconColor: AppColors.violet,
                   title: 'Theme',
                   subtitle: 'App theme and appearance',
                   trailingValue: _themeLabel(settings.valueOrNull),
@@ -143,7 +144,24 @@ class SettingsScreen extends ConsumerWidget {
             ),
             const SizedBox(height: AppSpacing.sectionGap),
 
-            // 5. Support & Information
+            // 5. Help
+            SettingsGroup(
+              title: 'Help',
+              children: [
+                SettingsTile(
+                  icon: Icons.help_outline_rounded,
+                  iconColor: AppColors.info500,
+                  title: 'Replay App Tour',
+                  subtitle: 'See the onboarding walkthrough again',
+                  onTap: () => ref
+                      .read(walkthroughControllerProvider.notifier)
+                      .beginReplay(projectId),
+                ),
+              ],
+            ),
+            const SizedBox(height: AppSpacing.sectionGap),
+
+            // 6. Support & Information
             SettingsGroup(
               title: 'Support & Information',
               children: [
@@ -170,7 +188,7 @@ class SettingsScreen extends ConsumerWidget {
                 ),
                 SettingsTile(
                   icon: Icons.headset_mic_outlined,
-                  iconColor: const Color(0xFF8B5CF6),
+                  iconColor: AppColors.violet,
                   title: 'Contact Support',
                   subtitle: 'Get help or contact our support team',
                   onTap: () => _go(context, AppRouteNames.contactSupport),

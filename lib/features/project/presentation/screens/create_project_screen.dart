@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../constants/app_strings.dart';
+import '../../../../features/onboarding/presentation/walkthrough_controller.dart';
+import '../../../../features/onboarding/presentation/walkthrough_step.dart';
 import '../../../../navigation/app_router.dart';
 import '../../../../shared/widgets/index.dart';
 import '../../../../theme/app_colors.dart';
@@ -205,7 +207,18 @@ class _CreateProjectScreenState extends ConsumerState<CreateProjectScreen> {
       if (!mounted) return;
 
       if (created != null) {
-        context.goNamed(AppRouteNames.projects);
+        // During the onboarding tour, open the new project's dashboard so the
+        // walkthrough can resume there; otherwise return to the project list.
+        final touring =
+            ref.read(walkthroughControllerProvider) == WalkStep.createProject;
+        if (touring) {
+          context.goNamed(
+            AppRouteNames.dashboard,
+            pathParameters: {'id': created.id.toString()},
+          );
+        } else {
+          context.goNamed(AppRouteNames.projects);
+        }
       }
     } catch (e) {
       if (!mounted) return;

@@ -318,10 +318,10 @@ class _BodyState extends ConsumerState<_Body> {
 String _qty(double v) =>
     v == v.roundToDouble() ? v.toStringAsFixed(0) : v.toStringAsFixed(1);
 
-const _brown = Color(0xFF8D6E63);
-const _indigo = Color(0xFF5C6BC0);
-const _teal = Color(0xFF26A69A);
-const _purple = Color(0xFF8B5CF6);
+const _brown = AppColors.brown;
+const _indigo = AppColors.indigo;
+const _teal = AppColors.teal;
+const _purple = AppColors.violet;
 
 /// Maps a material name to a representative icon + tint color.
 ({IconData icon, Color color}) _materialVisual(String name) {

@@ -37,6 +37,9 @@ dependencies:
   intl: ^0.20.1
   uuid: ^4.5.1
 
+  # Onboarding walkthrough / product tour
+  tutorial_coach_mark: ^1.2.11
+
   cupertino_icons: ^1.0.8
 
 dev_dependencies:

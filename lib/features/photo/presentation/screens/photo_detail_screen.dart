@@ -87,18 +87,18 @@ class _PhotoDetailScreenState extends ConsumerState<PhotoDetailScreen> {
                 ?.name;
 
         return Scaffold(
-          backgroundColor: Colors.black,
+          backgroundColor: AppColors.black,
           appBar: AppBar(
-            backgroundColor: Colors.black,
-            foregroundColor: Colors.white,
+            backgroundColor: AppColors.black,
+            foregroundColor: AppColors.white,
             elevation: 0,
             title: Text(
               '${_index + 1} / ${photos.length}',
-              style: AppTextStyles.bodyMedium.copyWith(color: Colors.white),
+              style: AppTextStyles.bodyMedium.copyWith(color: AppColors.white),
             ),
             actions: [
               IconButton(
-                icon: const Icon(Icons.ios_share_rounded, color: Colors.white),
+                icon: const Icon(Icons.ios_share_rounded, color: AppColors.white),
                 tooltip: 'Share',
                 onPressed: () => _share(current.filePath, current.caption),
               ),
@@ -130,9 +130,9 @@ class _PhotoDetailScreenState extends ConsumerState<PhotoDetailScreen> {
                                 gaplessPlayback: true,
                                 filterQuality: FilterQuality.medium,
                               )
-                            : const Icon(
+                            : Icon(
                                 Icons.broken_image_outlined,
-                                color: Colors.white54,
+                                color: AppColors.white.withValues(alpha: 0.54),
                                 size: 64,
                               ),
                       ),
@@ -196,7 +196,7 @@ class _InfoStrip extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      color: Colors.black87,
+      color: AppColors.black.withValues(alpha: 0.87),
       padding: const EdgeInsets.fromLTRB(
         AppSpacing.pageHorizontal,
         AppSpacing.md,
@@ -210,13 +210,13 @@ class _InfoStrip extends StatelessWidget {
             Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(Icons.layers_outlined,
-                    color: Colors.white70, size: 14),
+                Icon(Icons.layers_outlined,
+                    color: AppColors.white.withValues(alpha: 0.7), size: 14),
                 const SizedBox(width: AppSpacing.xs),
                 Text(
                   stageName!,
                   style:
-                      AppTextStyles.labelMedium.copyWith(color: Colors.white),
+                      AppTextStyles.labelMedium.copyWith(color: AppColors.white),
                 ),
               ],
             ),
@@ -225,13 +225,14 @@ class _InfoStrip extends StatelessWidget {
           if (caption != null && caption!.isNotEmpty) ...[
             Text(
               caption!,
-              style: AppTextStyles.bodyMedium.copyWith(color: Colors.white),
+              style: AppTextStyles.bodyMedium.copyWith(color: AppColors.white),
             ),
             const SizedBox(height: AppSpacing.xs),
           ],
           Text(
             DateFormatter.formatFull(takenAt),
-            style: AppTextStyles.bodySmall.copyWith(color: Colors.white60),
+            style: AppTextStyles.bodySmall
+                .copyWith(color: AppColors.white.withValues(alpha: 0.6)),
           ),
         ],
       ),

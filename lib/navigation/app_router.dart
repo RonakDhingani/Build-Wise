@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../features/onboarding/presentation/walkthrough_controller.dart';
+import '../features/onboarding/presentation/walkthrough_keys.dart';
+import '../features/onboarding/presentation/walkthrough_step.dart';
+import 'package:tutorial_coach_mark/tutorial_coach_mark.dart';
 import '../features/splash/presentation/screens/splash_screen.dart';
 import '../features/project/presentation/screens/project_selection_screen.dart';
 import '../features/project/presentation/screens/create_project_screen.dart';
@@ -34,11 +39,11 @@ import '../features/photo/presentation/screens/photo_detail_screen.dart';
 
 part 'route_names.dart';
 
-final _rootNavigatorKey = GlobalKey<NavigatorState>();
+final rootNavigatorKey = GlobalKey<NavigatorState>();
 final _shellNavigatorKey = GlobalKey<NavigatorState>();
 
 final appRouter = GoRouter(
-  navigatorKey: _rootNavigatorKey,
+  navigatorKey: rootNavigatorKey,
   initialLocation: AppRoutePaths.root,
   routes: [
     GoRoute(
@@ -214,7 +219,7 @@ final appRouter = GoRouter(
                 GoRoute(
                   path: 'add',
                   name: AppRouteNames.addExpense,
-                  parentNavigatorKey: _rootNavigatorKey,
+                  parentNavigatorKey: rootNavigatorKey,
                   builder: (context, state) {
                     final id = int.parse(state.pathParameters['id']!);
                     return AddEditExpenseScreen(projectId: id);
@@ -223,7 +228,7 @@ final appRouter = GoRouter(
                 GoRoute(
                   path: ':expenseId',
                   name: AppRouteNames.expenseDetail,
-                  parentNavigatorKey: _rootNavigatorKey,
+                  parentNavigatorKey: rootNavigatorKey,
                   builder: (context, state) {
                     final id = int.parse(state.pathParameters['id']!);
                     final expId =
@@ -234,7 +239,7 @@ final appRouter = GoRouter(
                     GoRoute(
                       path: 'edit',
                       name: AppRouteNames.editExpense,
-                      parentNavigatorKey: _rootNavigatorKey,
+                      parentNavigatorKey: rootNavigatorKey,
                       builder: (context, state) {
                         final id = int.parse(state.pathParameters['id']!);
                         final expId =
@@ -260,7 +265,7 @@ final appRouter = GoRouter(
                 GoRoute(
                   path: 'add',
                   name: AppRouteNames.addMaterial,
-                  parentNavigatorKey: _rootNavigatorKey,
+                  parentNavigatorKey: rootNavigatorKey,
                   builder: (context, state) {
                     final id = int.parse(state.pathParameters['id']!);
                     return AddEditMaterialScreen(projectId: id);
@@ -269,7 +274,7 @@ final appRouter = GoRouter(
                 GoRoute(
                   path: ':materialId',
                   name: AppRouteNames.materialDetail,
-                  parentNavigatorKey: _rootNavigatorKey,
+                  parentNavigatorKey: rootNavigatorKey,
                   builder: (context, state) {
                     final id = int.parse(state.pathParameters['id']!);
                     final matId = int.parse(state.pathParameters['materialId']!);
@@ -279,7 +284,7 @@ final appRouter = GoRouter(
                     GoRoute(
                       path: 'edit',
                       name: AppRouteNames.editMaterial,
-                      parentNavigatorKey: _rootNavigatorKey,
+                      parentNavigatorKey: rootNavigatorKey,
                       builder: (context, state) {
                         final id = int.parse(state.pathParameters['id']!);
                         final matId =
@@ -305,7 +310,7 @@ final appRouter = GoRouter(
                 GoRoute(
                   path: 'pdf',
                   name: AppRouteNames.pdfViewer,
-                  parentNavigatorKey: _rootNavigatorKey,
+                  parentNavigatorKey: rootNavigatorKey,
                   builder: (context, state) {
                     final id = int.parse(state.pathParameters['id']!);
                     final type = ReportType.fromId(
@@ -345,11 +350,16 @@ class _ProjectShell extends StatelessWidget {
   }
 }
 
-class _BottomNav extends StatelessWidget {
+class _BottomNav extends ConsumerStatefulWidget {
   const _BottomNav({required this.projectId});
 
   final int projectId;
 
+  @override
+  ConsumerState<_BottomNav> createState() => _BottomNavState();
+}
+
+class _BottomNavState extends ConsumerState<_BottomNav> {
   static const _tabs = [
     (icon: Icons.dashboard_outlined, activeIcon: Icons.dashboard, label: 'Dashboard'),
     (icon: Icons.receipt_long_outlined, activeIcon: Icons.receipt_long, label: 'Expenses'),
@@ -357,6 +367,13 @@ class _BottomNav extends StatelessWidget {
     (icon: Icons.bar_chart_outlined, activeIcon: Icons.bar_chart, label: 'Reports'),
     (icon: Icons.settings_outlined, activeIcon: Icons.settings, label: 'Settings'),
   ];
+
+  // Walkthrough spotlight keys per highlighted tab index.
+  static final _navKeys = {
+    1: WalkthroughKeys.navExpenses,
+    2: WalkthroughKeys.navMaterials,
+    3: WalkthroughKeys.navReports,
+  };
 
   int _locationToIndex(String location) {
     if (location.contains('/dashboard')) return 0;
@@ -375,7 +392,8 @@ class _BottomNav extends StatelessWidget {
       AppRouteNames.reports,
       AppRouteNames.projectSettings,
     ];
-    context.goNamed(routes[index], pathParameters: {'id': projectId.toString()});
+    context.goNamed(routes[index],
+        pathParameters: {'id': widget.projectId.toString()});
   }
 
   @override
@@ -383,16 +401,40 @@ class _BottomNav extends StatelessWidget {
     final location = GoRouterState.of(context).uri.toString();
     final currentIndex = _locationToIndex(location);
 
+    // Spotlight the relevant tab when its walkthrough step is active.
+    final step = ref.watch(walkthroughControllerProvider);
+    final stepForKey = {
+      WalkStep.expensesTab: WalkthroughKeys.navExpenses,
+      WalkStep.materialsTab: WalkthroughKeys.navMaterials,
+      WalkStep.reportsTab: WalkthroughKeys.navReports,
+    };
+    if (stepForKey.containsKey(step)) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        ref.read(walkthroughControllerProvider.notifier).maybeShowCoach(
+              context,
+              step,
+              key: stepForKey[step]!,
+              shape: ShapeLightFocus.Circle,
+              align: ContentAlign.top,
+            );
+      });
+    }
+
     return BottomNavigationBar(
       currentIndex: currentIndex,
       onTap: (i) => _onTap(context, i),
-      items: _tabs
-          .map((t) => BottomNavigationBarItem(
-                icon: Icon(t.icon),
-                activeIcon: Icon(t.activeIcon),
-                label: t.label,
-              ))
-          .toList(),
+      items: [
+        for (var i = 0; i < _tabs.length; i++)
+          BottomNavigationBarItem(
+            icon: KeyedSubtree(
+              key: _navKeys[i],
+              child: Icon(_tabs[i].icon),
+            ),
+            activeIcon: Icon(_tabs[i].activeIcon),
+            label: _tabs[i].label,
+          ),
+      ],
     );
   }
 }

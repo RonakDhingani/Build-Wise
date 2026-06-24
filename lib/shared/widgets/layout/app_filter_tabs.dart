@@ -51,7 +51,7 @@ class AppFilterTabs extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: selected
                         ? LightThemeColors.primary
-                        : Colors.transparent,
+                        : AppColors.transparent,
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),

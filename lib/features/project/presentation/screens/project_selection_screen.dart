@@ -2,9 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:tutorial_coach_mark/tutorial_coach_mark.dart';
+
 import '../../../../constants/app_strings.dart';
 import '../../../../navigation/app_router.dart';
 import '../../../../features/settings/presentation/providers/settings_providers.dart';
+import '../../../../features/onboarding/presentation/walkthrough_controller.dart';
+import '../../../../features/onboarding/presentation/walkthrough_keys.dart';
+import '../../../../features/onboarding/presentation/walkthrough_step.dart';
 import '../../../../shared/widgets/index.dart';
 import '../../../../theme/app_colors.dart';
 import '../../../../theme/app_spacing.dart';
@@ -19,6 +24,24 @@ class ProjectSelectionScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(projectsNotifierProvider);
+
+    // Onboarding: auto-start on first run; show the create-project spotlight.
+    final completed = ref.watch(walkthroughCompletedProvider);
+    final walkStep = ref.watch(walkthroughControllerProvider);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final notifier = ref.read(walkthroughControllerProvider.notifier);
+      if (walkStep == WalkStep.idle && completed.valueOrNull == false) {
+        notifier.beginFirstRun();
+      } else if (walkStep == WalkStep.createProject) {
+        notifier.maybeShowCoach(
+          context,
+          WalkStep.createProject,
+          key: WalkthroughKeys.createProject,
+          shape: ShapeLightFocus.RRect,
+          align: ContentAlign.top,
+        );
+      }
+    });
 
     return AppScaffold(
       appBar: AppBarWidget(
@@ -44,6 +67,7 @@ class ProjectSelectionScreen extends ConsumerWidget {
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
+        key: WalkthroughKeys.createProject,
         onPressed: () => context.pushNamed(AppRouteNames.createProject),
         icon: const Icon(Icons.add),
         label: const Text('New Project'),

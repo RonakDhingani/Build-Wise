@@ -32,7 +32,7 @@ class AppBottomSheet extends StatelessWidget {
       context: context,
       isDismissible: isDismissible,
       isScrollControlled: true,
-      backgroundColor: Colors.transparent,
+      backgroundColor: AppColors.transparent,
       builder: (_) => AppBottomSheet(
         title: title,
         maxHeightFraction: maxHeightFraction,

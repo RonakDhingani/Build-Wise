@@ -330,8 +330,8 @@ class _PhotoTile extends StatelessWidget {
                       begin: Alignment.bottomCenter,
                       end: Alignment.topCenter,
                       colors: [
-                        Colors.black.withValues(alpha: 0.7),
-                        Colors.transparent,
+                        AppColors.black.withValues(alpha: 0.7),
+                        AppColors.transparent,
                       ],
                     ),
                   ),
@@ -345,14 +345,14 @@ class _PhotoTile extends StatelessWidget {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: AppTextStyles.labelSmall.copyWith(
-                            color: Colors.white,
+                            color: AppColors.white,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
                       Text(
                         DateFormatter.formatShort(photo.takenAt),
                         style: AppTextStyles.labelSmall.copyWith(
-                          color: Colors.white70,
+                          color: AppColors.white.withValues(alpha: 0.7),
                           fontSize: 9,
                         ),
                       ),
@@ -378,8 +378,10 @@ class _PhotoTile extends StatelessWidget {
                         : Icons.radio_button_unchecked_rounded,
                     size: 22,
                     color: LightThemeColors.cardBg,
-                    shadows: const [
-                      Shadow(color: Colors.black54, blurRadius: 4),
+                    shadows: [
+                      Shadow(
+                          color: AppColors.black.withValues(alpha: 0.54),
+                          blurRadius: 4),
                     ],
                   ),
                 ),
@@ -488,7 +490,7 @@ class _TimelineGroup extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: LightThemeColors.primary,
                   shape: BoxShape.circle,
-                  border: Border.all(color: Colors.white, width: 2),
+                  border: Border.all(color: AppColors.white, width: 2),
                 ),
               ),
               if (!isLast)
@@ -591,9 +593,10 @@ class _TimelineGroup extends StatelessWidget {
                                                   .radio_button_unchecked_rounded,
                                           size: 20,
                                           color: LightThemeColors.cardBg,
-                                          shadows: const [
+                                          shadows: [
                                             Shadow(
-                                                color: Colors.black54,
+                                                color: AppColors.black
+                                                    .withValues(alpha: 0.54),
                                                 blurRadius: 4),
                                           ],
                                         ),

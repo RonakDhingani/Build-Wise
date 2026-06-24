@@ -192,7 +192,7 @@ class ProjectCard extends StatelessWidget {
   void _showContextMenu(BuildContext context) {
     showModalBottomSheet(
       context: context,
-      backgroundColor: Colors.transparent,
+      backgroundColor: AppColors.transparent,
       builder: (_) => ClipRRect(
         borderRadius: const BorderRadius.vertical(
           top: Radius.circular(AppDimensions.radiusXl),
@@ -292,19 +292,19 @@ class _Header extends StatelessWidget {
                 width: 36,
                 height: 36,
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.15),
+                  color: AppColors.white.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(AppDimensions.radiusSm),
                 ),
                 child: const Icon(
                   Icons.business_outlined,
-                  color: Colors.white,
+                  color: AppColors.white,
                   size: AppDimensions.iconSm,
                 ),
               ),
               const Spacer(),
               Text(
                 '${project.completionPercentage.toInt()}%',
-                style: AppTextStyles.headlineSmall.copyWith(color: Colors.white),
+                style: AppTextStyles.headlineSmall.copyWith(color: AppColors.white),
               ),
             ],
           ),

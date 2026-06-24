@@ -9,10 +9,15 @@ import '../../../../theme/app_colors.dart';
 import '../../../../theme/app_shadows.dart';
 import '../../../../theme/app_spacing.dart';
 import '../../../../theme/app_text_styles.dart';
+import 'package:tutorial_coach_mark/tutorial_coach_mark.dart';
+
 import '../../../../utils/analytics.dart';
 import '../../../../utils/currency_formatter.dart';
 import '../../../../utils/date_formatter.dart';
 import '../../../expense/domain/entities/expense_entity.dart';
+import '../../../onboarding/presentation/walkthrough_controller.dart';
+import '../../../onboarding/presentation/walkthrough_keys.dart';
+import '../../../onboarding/presentation/walkthrough_step.dart';
 import '../providers/dashboard_providers.dart';
 
 class DashboardScreen extends ConsumerWidget {
@@ -23,6 +28,20 @@ class DashboardScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final async = ref.watch(dashboardProvider(projectId));
+
+    // Onboarding: resume the tour on this project, spotlight budget / photos.
+    final walkStep = ref.watch(walkthroughControllerProvider);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final n = ref.read(walkthroughControllerProvider.notifier);
+      n.onDashboardReady(projectId);
+      if (walkStep == WalkStep.budget) {
+        n.maybeShowCoach(context, WalkStep.budget,
+            key: WalkthroughKeys.budgetCard, align: ContentAlign.bottom);
+      } else if (walkStep == WalkStep.photos) {
+        n.maybeShowCoach(context, WalkStep.photos,
+            key: WalkthroughKeys.photosAction, align: ContentAlign.top);
+      }
+    });
 
     return async.when(
       skipLoadingOnReload: true,
@@ -93,12 +112,15 @@ class _DashboardBody extends StatelessWidget {
           const SizedBox(height: AppSpacing.lg),
 
           // Budget card
-          _BudgetCard(
-            budget: project.budget,
-            spent: project.totalSpent,
-            remaining: project.remaining,
-            spentPercent: project.spentPercent,
-            healthColor: healthColor,
+          KeyedSubtree(
+            key: WalkthroughKeys.budgetCard,
+            child: _BudgetCard(
+              budget: project.budget,
+              spent: project.totalSpent,
+              remaining: project.remaining,
+              spentPercent: project.spentPercent,
+              healthColor: healthColor,
+            ),
           ),
 
           const SizedBox(height: AppSpacing.md),
@@ -441,6 +463,7 @@ class _QuickActions extends StatelessWidget {
         const SizedBox(width: AppSpacing.md),
         Expanded(
           child: _ActionButton(
+            key: WalkthroughKeys.photosAction,
             icon: Icons.photo_camera_outlined,
             label: 'Photos',
             onTap: () => context.pushNamed(
@@ -456,6 +479,7 @@ class _QuickActions extends StatelessWidget {
 
 class _ActionButton extends StatelessWidget {
   const _ActionButton({
+    super.key,
     required this.icon,
     required this.label,
     required this.onTap,

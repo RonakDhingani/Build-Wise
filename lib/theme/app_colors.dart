@@ -34,6 +34,8 @@ abstract class AppColors {
   static const Color neutral100 = Color(0xFFF4F4F8);
   static const Color neutral50 = Color(0xFFFAFAFC);
   static const Color white = Color(0xFFFFFFFF);
+  static const Color black = Color(0xFF000000);
+  static const Color transparent = Color(0x00000000);
 
   // Semantic
   static const Color success500 = Color(0xFF16A34A);
@@ -44,6 +46,42 @@ abstract class AppColors {
   static const Color error100 = Color(0xFFFEE2E2);
   static const Color info500 = Color(0xFF0EA5E9);
   static const Color info100 = Color(0xFFE0F2FE);
+
+  // Accent / category palette — distinct hues for category tags, material
+  // tints and chart series that have no intrinsic brand color.
+  static const Color violet = Color(0xFF8B5CF6);
+  static const Color indigo = Color(0xFF5C6BC0);
+  static const Color teal = Color(0xFF26A69A);
+  static const Color red = Color(0xFFEF5350);
+  static const Color orange = Color(0xFFFFA726);
+  static const Color green = Color(0xFF66BB6A);
+  static const Color blue = Color(0xFF42A5F5);
+  static const Color purple = Color(0xFFAB47BC);
+  static const Color pink = Color(0xFFEC407A);
+  static const Color brown = Color(0xFF8D6E63);
+  static const Color blueGrey = Color(0xFF78909C);
+
+  /// Cyclic palette for category color assignment (expense categories).
+  static const List<Color> categoryPalette = [
+    indigo,
+    teal,
+    red,
+    orange,
+    green,
+    blue,
+    purple,
+    pink,
+    brown,
+    blueGrey,
+  ];
+}
+
+/// Semantic scrim/overlay colors (black with alpha) for image viewers,
+/// gradients and modal scrims — single source for "black tint" usage.
+abstract class AppOverlays {
+  static const Color scrim = Color(0x8A000000); // black 54%
+  static const Color scrimStrong = Color(0xDE000000); // black 87%
+  static const Color scrimSoft = Color(0x59000000); // black ~35%
 }
 
 abstract class LightThemeColors {

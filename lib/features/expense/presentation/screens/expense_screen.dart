@@ -12,6 +12,11 @@ import '../../../../utils/currency_formatter.dart';
 import '../../../../utils/analytics.dart';
 import '../../../../utils/date_formatter.dart';
 import '../../../../utils/trend_stats.dart';
+import 'package:tutorial_coach_mark/tutorial_coach_mark.dart';
+
+import '../../../onboarding/presentation/walkthrough_controller.dart';
+import '../../../onboarding/presentation/walkthrough_keys.dart';
+import '../../../onboarding/presentation/walkthrough_step.dart';
 import '../../domain/entities/expense_entity.dart';
 import '../notifiers/expense_notifier.dart';
 import '../providers/expense_providers.dart';
@@ -24,6 +29,19 @@ class ExpenseScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final async = ref.watch(expensesNotifierProvider(projectId));
+
+    // Onboarding: spotlight the add-expense button when its step is active.
+    final walkStep = ref.watch(walkthroughControllerProvider);
+    if (walkStep == WalkStep.addExpense) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        ref.read(walkthroughControllerProvider.notifier).maybeShowCoach(
+              context,
+              WalkStep.addExpense,
+              key: WalkthroughKeys.addExpense,
+              align: ContentAlign.top,
+            );
+      });
+    }
 
     return AppScaffold(
       appBar: AppBarWidget(
@@ -233,11 +251,14 @@ class _BodyState extends ConsumerState<_Body> {
                   ],
                 ),
         ),
-        AppBottomButton(
-          label: '+  Add Expense',
-          onPressed: () => context.pushNamed(
-            AppRouteNames.addExpense,
-            pathParameters: {'id': widget.projectId.toString()},
+        KeyedSubtree(
+          key: WalkthroughKeys.addExpense,
+          child: AppBottomButton(
+            label: '+  Add Expense',
+            onPressed: () => context.pushNamed(
+              AppRouteNames.addExpense,
+              pathParameters: {'id': widget.projectId.toString()},
+            ),
           ),
         ),
       ],
