@@ -120,7 +120,10 @@ p { margin: 0 0 1rem; }
 .brand b { color: var(--primary); }
 .nav__links { display: flex; align-items: center; gap: 4px; list-style: none; margin: 0; padding: 0; }
 .nav__links a { color: var(--text-secondary); font-weight: 600; padding: 9px 15px; border-radius: var(--radius-full); transition: .2s; }
-.nav__links a:hover { color: var(--primary); background: rgba(30, 78, 140, .08); text-decoration: none; }
+.nav__links a:not(.btn):hover { color: var(--primary); background: rgba(30, 78, 140, .08); text-decoration: none; }
+/* CTA — white text on dark primary background (default + hover). */
+.nav__cta .btn-primary { color: #fff; background: var(--primary); box-shadow: var(--shadow); }
+.nav__cta .btn-primary:hover { color: #fff; background: var(--primary-dark); box-shadow: var(--shadow-glow); }
 .nav__cta { margin-left: 8px; }
 .nav__toggle { display: none; background: none; border: 0; cursor: pointer; padding: 8px; border-radius: var(--radius-sm); }
 .nav__toggle span { display: block; width: 24px; height: 2px; background: var(--text); margin: 5px 0; transition: .25s; border-radius: 2px; }
@@ -171,13 +174,13 @@ p { margin: 0 0 1rem; }
 
 /* floating hero preview */
 .hero__art { display: flex; justify-content: center; position: relative; }
-.hero__preview { position: relative; will-change: transform; }
-.hero__preview .phone { animation: floaty 6s ease-in-out infinite; }
+.hero__preview { position: relative; will-change: transform; isolation: isolate; }
+.hero__preview .phone { position: relative; z-index: 1; animation: floaty 6s ease-in-out infinite; }
 .float-card {
-  position: absolute; background: rgba(255, 255, 255, .9); color: var(--text);
+  position: absolute; z-index: 2; background: rgba(255, 255, 255, .94); color: var(--text);
   border: 1px solid var(--glass-border); border-radius: var(--radius); padding: 12px 14px;
   box-shadow: var(--shadow-lg); backdrop-filter: blur(10px); font-size: .82rem; font-weight: 600;
-  display: flex; align-items: center; gap: 10px;
+  display: flex; align-items: center; gap: 10px; pointer-events: none;
 }
 .float-card .dot { width: 30px; height: 30px; border-radius: 9px; display: grid; place-items: center; font-size: 1rem; }
 .float-card small { display: block; color: var(--text-tertiary); font-weight: 600; font-size: .72rem; }
