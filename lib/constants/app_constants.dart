@@ -3,10 +3,18 @@ abstract class AppConstants {
   static const int dbSchemaVersion = 1;
   static const int appSettingsId = 0;
 
-  // App info (Settings → About)
-  static const String appVersion = '1.0.0';
-  static const String buildNumber = '1';
+  // App info. Version + build number are NOT hardcoded — read live from
+  // package_info_plus (single source: pubspec `version:`). Used in About screen,
+  // update checks and backup manifest.
   static const String supportEmail = 'support@buildwise.app';
+
+  // Website URLs (opened in-app via WebView)
+  static const String websiteBase =
+      'https://ronakdhingani.github.io/Build-Wise/website';
+  static const String aboutUrl = '$websiteBase/index.html';
+  static const String privacyPolicyUrl = '$websiteBase/privacy-policy.html';
+  static const String termsUrl = '$websiteBase/terms-and-conditions.html';
+  static const String contactSupportUrl = '$websiteBase/contact.html';
 
   // Currency options (Settings → Currency)
   static const List<({String code, String symbol, String label})>

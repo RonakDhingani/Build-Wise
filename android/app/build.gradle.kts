@@ -1,5 +1,7 @@
 plugins {
     id("com.android.application")
+    // Google services Gradle plugin (Firebase) — after AGP, before Flutter plugin.
+    id("com.google.gms.google-services")
     // The Flutter Gradle Plugin must be applied after the Android Gradle plugin.
     // Kotlin support is provided by Flutter's built-in Kotlin (no KGP needed).
     id("dev.flutter.flutter-gradle-plugin")

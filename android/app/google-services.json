@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "171820089623",
+    "project_id": "build-wise-5e956",
+    "storage_bucket": "build-wise-5e956.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:171820089623:android:d13ba760ae0a618c8cf752",
+        "android_client_info": {
+          "package_name": "com.buildwise.build_wise"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBmEwF3Yedl7juOWmndvEti8HGVBVYY7Co"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

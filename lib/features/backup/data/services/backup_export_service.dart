@@ -3,9 +3,9 @@ import 'dart:io';
 
 import 'package:archive/archive.dart';
 import 'package:isar/isar.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
 
-import '../../../../constants/app_constants.dart';
 import '../../../expense/data/models/expense_category_isar_model.dart';
 import '../../../expense/data/models/expense_isar_model.dart';
 import '../../../material/data/models/material_isar_model.dart';
@@ -127,10 +127,11 @@ class BackupExportService {
       categories: categoryMaps.length,
       photos: photoMaps.length,
     );
+    final pkg = await PackageInfo.fromPlatform();
     final manifest = BackupManifest(
       magic: BackupFormat.magic,
       formatVersion: BackupFormat.formatVersion,
-      appVersion: AppConstants.appVersion,
+      appVersion: pkg.version,
       createdAt: DateTime.now(),
       scope: scope,
       counts: counts,

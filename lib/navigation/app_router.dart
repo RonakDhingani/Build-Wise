@@ -30,9 +30,9 @@ import '../features/settings/presentation/screens/currency_screen.dart';
 import '../features/settings/presentation/screens/date_format_screen.dart';
 import '../features/settings/presentation/screens/theme_screen.dart';
 import '../features/settings/presentation/screens/about_screen.dart';
-import '../features/settings/presentation/screens/privacy_policy_screen.dart';
-import '../features/settings/presentation/screens/terms_screen.dart';
-import '../features/settings/presentation/screens/contact_support_screen.dart';
+import '../features/settings/presentation/screens/web_view_screen.dart';
+import '../features/contact_support/screens/contact_support_screen.dart';
+import '../constants/app_constants.dart';
 import '../features/stage/presentation/screens/stages_screen.dart';
 import '../features/stage/presentation/screens/stage_detail_screen.dart';
 import '../features/stage/presentation/screens/add_edit_stage_screen.dart';
@@ -210,12 +210,18 @@ final appRouter = GoRouter(
         GoRoute(
           path: ':id/privacy-policy',
           name: AppRouteNames.privacyPolicy,
-          builder: (context, state) => const PrivacyPolicyScreen(),
+          builder: (context, state) => const WebViewScreen(
+            title: 'Privacy Policy',
+            url: AppConstants.privacyPolicyUrl,
+          ),
         ),
         GoRoute(
           path: ':id/terms',
           name: AppRouteNames.terms,
-          builder: (context, state) => const TermsScreen(),
+          builder: (context, state) => const WebViewScreen(
+            title: 'Terms & Conditions',
+            url: AppConstants.termsUrl,
+          ),
         ),
         GoRoute(
           path: ':id/contact-support',

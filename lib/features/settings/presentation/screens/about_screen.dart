@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
-import '../../../../constants/app_constants.dart';
 import '../../../../constants/app_strings.dart';
 import '../../../../shared/widgets/index.dart';
 import '../../../../theme/app_colors.dart';
@@ -49,8 +49,20 @@ class AboutScreen extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.xxxl),
           _InfoRow(label: 'App Name', value: AppStrings.appName),
-          _InfoRow(label: 'Version', value: AppConstants.appVersion),
-          _InfoRow(label: 'Build Number', value: AppConstants.buildNumber),
+          // Live version + build from the installed package (single source:
+          // pubspec version, surfaced via package_info_plus).
+          FutureBuilder<PackageInfo>(
+            future: PackageInfo.fromPlatform(),
+            builder: (context, snapshot) {
+              final info = snapshot.data;
+              return Column(
+                children: [
+                  _InfoRow(label: 'Version', value: info?.version ?? '—'),
+                  _InfoRow(label: 'Build Number', value: info?.buildNumber ?? '—'),
+                ],
+              );
+            },
+          ),
         ],
       ),
     );
