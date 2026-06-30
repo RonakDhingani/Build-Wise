@@ -94,13 +94,13 @@ class SettingsScreen extends ConsumerWidget {
                   subtitle: 'Export, import and restore your data offline',
                   onTap: () => _go(context, AppRouteNames.dataManagement),
                 ),
-                SettingsTile(
+                /*SettingsTile(
                   icon: Icons.delete_outline_rounded,
                   iconColor: AppColors.error500,
                   title: 'Reset Application',
                   subtitle: 'Clear all data and reset the app',
                   onTap: () => _comingSoon(context, 'Reset Application'),
-                ),
+                ),*/
               ],
             ),
             const SizedBox(height: AppSpacing.sectionGap),
@@ -125,14 +125,14 @@ class SettingsScreen extends ConsumerWidget {
                   trailingValue: _dateFormatLabel(settings.valueOrNull),
                   onTap: () => _go(context, AppRouteNames.dateFormat),
                 ),
-                SettingsTile(
+                /*SettingsTile(
                   icon: Icons.palette_outlined,
                   iconColor: AppColors.violet,
                   title: 'Theme',
                   subtitle: 'App theme and appearance',
                   trailingValue: _themeLabel(settings.valueOrNull),
                   onTap: () => _go(context, AppRouteNames.theme),
-                ),
+                ),*/
               ],
             ),
             const SizedBox(height: AppSpacing.sectionGap),

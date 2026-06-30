@@ -7,7 +7,7 @@
 (function () {
   'use strict';
 
-  var SUPPORT_EMAIL = 'support@buildwise.app';
+  var SUPPORT_EMAIL = 'support.ronaklabs@gmail.com';
   var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   /* ---- Mobile navigation ------------------------------------------------ */

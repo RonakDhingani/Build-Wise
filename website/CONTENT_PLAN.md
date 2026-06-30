@@ -10,7 +10,7 @@ projects (not a marketplace, not team collaboration).
 - **Tagline:** Smart Construction Budget & Project Manager
 - **Short description:** Manage construction budgets, expenses, materials,
   project stages, and progress photos in one powerful offline-first app.
-- **Support email:** support@buildwise.app
+- **Support email:** support.ronaklabs@gmail.com
 - **App version:** 1.0.0
 - **Play Store CTA label:** Download on Google Play
 
@@ -83,7 +83,7 @@ projects (not a marketplace, not team collaboration).
 ## Contact page
 
 - Intro: We'd love to hear from you.
-- Support Email card → support@buildwise.app
+- Support Email card → support.ronaklabs@gmail.com
 - Feature Requests card → email with subject "Feature Request"
 - Bug Reports card → email with subject "Bug Report"
 - Form fields: Name, Email, Subject, Message → opens mailto draft.

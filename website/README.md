@@ -33,7 +33,7 @@ website/
   buttons (in `index.html`) with your real Play Store listing URL.
 - **Domain:** replace `https://YOUR-DOMAIN-HERE/` in `robots.txt` and
   `sitemap.xml`, and the `og:url` / canonical values, with your live URL.
-- **Support email:** currently `support@buildwise.app` (in pages + `js/main.js`
+- **Support email:** currently `support.ronaklabs@gmail.com` (in pages + `js/main.js`
   `SUPPORT_EMAIL`). Change if different.
 - **Screenshots:** the gallery uses CSS phone mockups as placeholders. Drop real
   PNGs into an `assets/` folder and swap the `.phone` blocks for `<img>` tags.

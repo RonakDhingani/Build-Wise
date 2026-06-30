@@ -1,24 +1,69 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/result/result.dart';
 import '../../../../navigation/app_router.dart';
 import '../../../../theme/app_colors.dart';
 import '../../../../theme/app_text_styles.dart';
+import '../../../project/presentation/providers/project_providers.dart';
+import '../../../settings/presentation/providers/settings_providers.dart';
 
-class SplashScreen extends StatefulWidget {
+class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});
 
   @override
-  State<SplashScreen> createState() => _SplashScreenState();
+  ConsumerState<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> {
+class _SplashScreenState extends ConsumerState<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    Future.delayed(const Duration(milliseconds: 2200), () {
-      if (mounted) context.goNamed(AppRouteNames.projects);
-    });
+    Future.delayed(const Duration(milliseconds: 2200), _route);
+  }
+
+  /// Launch routing based on the Default Project setting:
+  /// * none -> Project Listing
+  /// * set & exists -> Project Listing in the stack, then open its Dashboard
+  ///   (so Back returns to the list)
+  /// * set & deleted -> reset to none -> Project Listing
+  Future<void> _route() async {
+    if (!mounted) return;
+    int? defaultId;
+    try {
+      final settings = await ref.read(settingsNotifierProvider.future);
+      defaultId = settings.defaultProjectId;
+    } catch (_) {
+      defaultId = null;
+    }
+    if (!mounted) return;
+
+    if (defaultId == null) {
+      context.goNamed(AppRouteNames.projects);
+      return;
+    }
+
+    // Confirm the default project still exists.
+    final result =
+        await ref.read(getProjectByIdUseCaseProvider).execute(defaultId);
+    if (!mounted) return;
+    final exists = result.when(success: (_) => true, failure: (_) => false);
+
+    if (!exists) {
+      // Stale default — reset and fall back to the list.
+      await ref.read(settingsNotifierProvider.notifier).setDefaultProject(null);
+      if (!mounted) return;
+      context.goNamed(AppRouteNames.projects);
+      return;
+    }
+
+    // Project list first (back stack), then straight into its dashboard.
+    context.goNamed(AppRouteNames.projects);
+    context.pushNamed(
+      AppRouteNames.dashboard,
+      pathParameters: {'id': defaultId.toString()},
+    );
   }
 
   @override

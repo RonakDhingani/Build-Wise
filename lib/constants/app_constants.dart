@@ -6,7 +6,7 @@ abstract class AppConstants {
   // App info. Version + build number are NOT hardcoded — read live from
   // package_info_plus (single source: pubspec `version:`). Used in About screen,
   // update checks and backup manifest.
-  static const String supportEmail = 'support@buildwise.app';
+  static const String supportEmail = 'support.ronaklabs@gmail.com';
 
   // Website URLs (opened in-app via WebView)
   static const String websiteBase =
