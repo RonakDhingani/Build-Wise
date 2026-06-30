@@ -7,9 +7,9 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:171820089623:android:d13ba760ae0a618c8cf752",
+        "mobilesdk_app_id": "1:171820089623:android:c3a96bdc4a79d1ca8cf752",
         "android_client_info": {
-          "package_name": "com.buildwise.build_wise"
+          "package_name": "com.buildwise"
         }
       },
       "oauth_client": [],

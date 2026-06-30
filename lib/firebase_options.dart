@@ -42,17 +42,17 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions web = FirebaseOptions(
     apiKey: 'AIzaSyCDtoEJdW2PcOm-H1qpU3U8kWdULmvoguw',
-    appId: '1:171820089623:web:92c1639a8c5887a18cf752',
+    appId: '1:171820089623:web:f3cea357cf96d74a8cf752',
     messagingSenderId: '171820089623',
     projectId: 'build-wise-5e956',
     authDomain: 'build-wise-5e956.firebaseapp.com',
     storageBucket: 'build-wise-5e956.firebasestorage.app',
-    measurementId: 'G-42BK6QT7EW',
+    measurementId: 'G-JVKVKXBGX5',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyBmEwF3Yedl7juOWmndvEti8HGVBVYY7Co',
-    appId: '1:171820089623:android:d13ba760ae0a618c8cf752',
+    appId: '1:171820089623:android:c3a96bdc4a79d1ca8cf752',
     messagingSenderId: '171820089623',
     projectId: 'build-wise-5e956',
     storageBucket: 'build-wise-5e956.firebasestorage.app',
@@ -60,16 +60,16 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyCdBm5Yae_MVXcqgO7_lUUJq454fZZwHkE',
-    appId: '1:171820089623:ios:c921585b923804268cf752',
+    appId: '1:171820089623:ios:46fdab4380368a7c8cf752',
     messagingSenderId: '171820089623',
     projectId: 'build-wise-5e956',
     storageBucket: 'build-wise-5e956.firebasestorage.app',
-    iosBundleId: 'com.buildwise.buildWise',
+    iosBundleId: 'com.buildwise',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
     apiKey: 'AIzaSyCdBm5Yae_MVXcqgO7_lUUJq454fZZwHkE',
-    appId: '1:171820089623:ios:c921585b923804268cf752',
+    appId: '1:171820089623:ios:58a3551b1ffd3f058cf752',
     messagingSenderId: '171820089623',
     projectId: 'build-wise-5e956',
     storageBucket: 'build-wise-5e956.firebasestorage.app',
@@ -78,11 +78,11 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions windows = FirebaseOptions(
     apiKey: 'AIzaSyCDtoEJdW2PcOm-H1qpU3U8kWdULmvoguw',
-    appId: '1:171820089623:web:afe730cf6f84b6d48cf752',
+    appId: '1:171820089623:web:21a45c4b87a0cc6b8cf752',
     messagingSenderId: '171820089623',
     projectId: 'build-wise-5e956',
     authDomain: 'build-wise-5e956.firebaseapp.com',
     storageBucket: 'build-wise-5e956.firebasestorage.app',
-    measurementId: 'G-67VW5S0P61',
+    measurementId: 'G-J9DNX14R02',
   );
 }

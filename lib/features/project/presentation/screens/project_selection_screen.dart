@@ -90,7 +90,7 @@ class ProjectSelectionScreen extends ConsumerWidget {
 /// Settings → Data Management → Import, surfaced from Home for discoverability.
 Future<void> _importProject(BuildContext context) async {
   try {
-    final result = await FilePicker.platform.pickFiles(
+    final result = await FilePicker.pickFiles(
       type: FileType.custom,
       allowedExtensions: ['zip'],
       withData: false,

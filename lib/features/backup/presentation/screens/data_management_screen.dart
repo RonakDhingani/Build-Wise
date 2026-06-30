@@ -136,7 +136,9 @@ class _DataManagementScreenState extends ConsumerState<DataManagementScreen> {
   Future<void> _runExport(BackupScope scope) async {
     _setBusy('Creating backup…');
     try {
-      final result = await ref.read(backupExportServiceProvider).export(
+      final result = await ref
+          .read(backupExportServiceProvider)
+          .export(
             scope: scope,
             projectId: scope == BackupScope.currentProject
                 ? widget.projectId
@@ -171,8 +173,11 @@ class _DataManagementScreenState extends ConsumerState<DataManagementScreen> {
           children: [
             Row(
               children: [
-                Icon(Icons.check_circle,
-                    color: AppColors.success500, size: AppDimensions.iconLg),
+                Icon(
+                  Icons.check_circle,
+                  color: AppColors.success500,
+                  size: AppDimensions.iconLg,
+                ),
                 const SizedBox(width: AppSpacing.sm),
                 Expanded(
                   child: Text(
@@ -187,15 +192,17 @@ class _DataManagementScreenState extends ConsumerState<DataManagementScreen> {
             Text(
               '${_formatBytes(result.sizeBytes)} • '
               '${result.manifest.counts.projects} project(s)',
-              style: AppTextStyles.bodySmall
-                  .copyWith(color: LightThemeColors.textSecondary),
+              style: AppTextStyles.bodySmall.copyWith(
+                color: LightThemeColors.textSecondary,
+              ),
             ),
             if (result.skippedPhotos > 0) ...[
               const SizedBox(height: AppSpacing.xs),
               Text(
                 '${result.skippedPhotos} photo(s) were skipped (file missing).',
-                style: AppTextStyles.bodySmall
-                    .copyWith(color: AppColors.gold400),
+                style: AppTextStyles.bodySmall.copyWith(
+                  color: AppColors.gold400,
+                ),
               ),
             ],
             const SizedBox(height: AppSpacing.lg),
@@ -246,7 +253,7 @@ class _DataManagementScreenState extends ConsumerState<DataManagementScreen> {
   Future<void> _saveFile(BackupResult result) async {
     try {
       final bytes = await File(result.filePath).readAsBytes();
-      final saved = await FilePicker.platform.saveFile(
+      final saved = await FilePicker.saveFile(
         dialogTitle: 'Save BuildWise Backup',
         fileName: result.fileName,
         bytes: bytes,
@@ -268,8 +275,9 @@ class _DataManagementScreenState extends ConsumerState<DataManagementScreen> {
         title: Text('Backup Location', style: AppTextStyles.titleLarge),
         content: Text(
           dir,
-          style: AppTextStyles.bodySmall
-              .copyWith(color: LightThemeColors.textSecondary),
+          style: AppTextStyles.bodySmall.copyWith(
+            color: LightThemeColors.textSecondary,
+          ),
         ),
         actions: [
           TextButton(
@@ -285,7 +293,7 @@ class _DataManagementScreenState extends ConsumerState<DataManagementScreen> {
 
   Future<void> _pickAndPreview() async {
     try {
-      final result = await FilePicker.platform.pickFiles(
+      final result = await FilePicker.pickFiles(
         type: FileType.custom,
         allowedExtensions: ['zip'],
         withData: false,
@@ -311,6 +319,7 @@ class _DataManagementScreenState extends ConsumerState<DataManagementScreen> {
       _busyLabel = label;
     });
   }
+
   void _clearBusy() {
     if (mounted) setState(() => _busy = false);
   }
@@ -322,8 +331,9 @@ class _DataManagementScreenState extends ConsumerState<DataManagementScreen> {
         title: Text('Something went wrong', style: AppTextStyles.titleLarge),
         content: Text(
           message,
-          style: AppTextStyles.bodyMedium
-              .copyWith(color: LightThemeColors.textSecondary),
+          style: AppTextStyles.bodyMedium.copyWith(
+            color: LightThemeColors.textSecondary,
+          ),
         ),
         actions: [
           TextButton(
@@ -352,8 +362,7 @@ class _OfflineBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin:
-          const EdgeInsets.symmetric(horizontal: AppSpacing.pageHorizontal),
+      margin: const EdgeInsets.symmetric(horizontal: AppSpacing.pageHorizontal),
       padding: const EdgeInsets.all(AppSpacing.lg),
       decoration: BoxDecoration(
         color: AppColors.info500.withValues(alpha: 0.08),
@@ -362,15 +371,19 @@ class _OfflineBanner extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Icon(Icons.cloud_off_outlined,
-              color: AppColors.info500, size: AppDimensions.iconMd),
+          Icon(
+            Icons.cloud_off_outlined,
+            color: AppColors.info500,
+            size: AppDimensions.iconMd,
+          ),
           const SizedBox(width: AppSpacing.md),
           Expanded(
             child: Text(
               'Backups are fully offline. Move the file to another device to '
               'transfer your projects.',
-              style: AppTextStyles.bodySmall
-                  .copyWith(color: LightThemeColors.textSecondary),
+              style: AppTextStyles.bodySmall.copyWith(
+                color: LightThemeColors.textSecondary,
+              ),
             ),
           ),
         ],
@@ -381,6 +394,7 @@ class _OfflineBanner extends StatelessWidget {
 
 class _IncludeRow extends StatelessWidget {
   const _IncludeRow(this.label);
+
   final String label;
 
   @override
@@ -389,8 +403,11 @@ class _IncludeRow extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: AppSpacing.sm),
       child: Row(
         children: [
-          Icon(Icons.check_rounded,
-              color: AppColors.success500, size: AppDimensions.iconSm),
+          Icon(
+            Icons.check_rounded,
+            color: AppColors.success500,
+            size: AppDimensions.iconSm,
+          ),
           const SizedBox(width: AppSpacing.sm),
           Text(label, style: AppTextStyles.bodyMedium),
         ],
@@ -401,6 +418,7 @@ class _IncludeRow extends StatelessWidget {
 
 class _LoadingOverlay extends StatelessWidget {
   const _LoadingOverlay({required this.label});
+
   final String label;
 
   @override
@@ -416,8 +434,9 @@ class _LoadingOverlay extends StatelessWidget {
               const SizedBox(height: AppSpacing.md),
               Text(
                 label,
-                style: AppTextStyles.bodyMedium
-                    .copyWith(color: AppColors.white),
+                style: AppTextStyles.bodyMedium.copyWith(
+                  color: AppColors.white,
+                ),
               ),
             ],
           ),

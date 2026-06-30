@@ -25,6 +25,7 @@ final walkthroughControllerProvider =
 /// spotlight appears when its target is mounted — robust to tab navigation.
 class WalkthroughController extends Notifier<WalkStep> {
   bool _firstRun = false;
+  bool _hasEverStarted = false;
   int? _projectId;
   TutorialCoachMark? _coach;
   WalkStep? _shown;
@@ -37,9 +38,13 @@ class WalkthroughController extends Notifier<WalkStep> {
   // ---- Entry points ----
 
   void beginFirstRun() {
-    if (state != WalkStep.idle) return;
+    if (state != WalkStep.idle || _hasEverStarted) return;
+    _hasEverStarted = true;
     _firstRun = true;
     _projectId = null;
+    // Persist immediately so dialog shows at most once per install,
+    // even if the app is killed while the tour is in progress.
+    ref.read(walkthroughStoreProvider).setCompleted(true);
     _go(WalkStep.welcome);
   }
 

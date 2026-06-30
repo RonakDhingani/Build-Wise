@@ -4,14 +4,14 @@
       "android": {
         "default": {
           "projectId": "build-wise-5e956",
-          "appId": "1:171820089623:android:d13ba760ae0a618c8cf752",
+          "appId": "1:171820089623:android:c3a96bdc4a79d1ca8cf752",
           "fileOutput": "android/app/google-services.json"
         }
       },
       "ios": {
         "default": {
           "projectId": "build-wise-5e956",
-          "appId": "1:171820089623:ios:c921585b923804268cf752",
+          "appId": "1:171820089623:ios:46fdab4380368a7c8cf752",
           "uploadDebugSymbols": false,
           "fileOutput": "ios/Runner/GoogleService-Info.plist"
         }
@@ -19,7 +19,7 @@
       "macos": {
         "default": {
           "projectId": "build-wise-5e956",
-          "appId": "1:171820089623:ios:c921585b923804268cf752",
+          "appId": "1:171820089623:ios:58a3551b1ffd3f058cf752",
           "uploadDebugSymbols": false,
           "fileOutput": "macos/Runner/GoogleService-Info.plist"
         }
@@ -28,11 +28,11 @@
         "lib/firebase_options.dart": {
           "projectId": "build-wise-5e956",
           "configurations": {
-            "android": "1:171820089623:android:d13ba760ae0a618c8cf752",
-            "ios": "1:171820089623:ios:c921585b923804268cf752",
-            "macos": "1:171820089623:ios:c921585b923804268cf752",
-            "web": "1:171820089623:web:92c1639a8c5887a18cf752",
-            "windows": "1:171820089623:web:afe730cf6f84b6d48cf752"
+            "android": "1:171820089623:android:c3a96bdc4a79d1ca8cf752",
+            "ios": "1:171820089623:ios:46fdab4380368a7c8cf752",
+            "macos": "1:171820089623:ios:58a3551b1ffd3f058cf752",
+            "web": "1:171820089623:web:f3cea357cf96d74a8cf752",
+            "windows": "1:171820089623:web:21a45c4b87a0cc6b8cf752"
           }
         }
       }

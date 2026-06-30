@@ -1,4 +1,4 @@
-package com.buildwise.build_wise
+package com.buildwise
 
 import io.flutter.embedding.android.FlutterActivity
 
