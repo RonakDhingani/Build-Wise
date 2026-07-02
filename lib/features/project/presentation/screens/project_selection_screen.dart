@@ -16,6 +16,7 @@ import '../../../../theme/app_colors.dart';
 import '../../../../theme/app_spacing.dart';
 import '../../../../theme/app_text_styles.dart';
 import '../../domain/entities/project_entity.dart';
+import '../actions/project_actions.dart';
 import '../notifiers/project_notifier.dart';
 import '../providers/project_providers.dart';
 import '../widgets/project_card.dart';
@@ -293,59 +294,14 @@ class _ProjectItem extends ConsumerWidget {
     return ProjectCard(
       project: project,
       currencySymbol: currencySymbol,
-      onTap: () => context.pushNamed(
-        AppRouteNames.dashboard,
-        pathParameters: {'id': project.id.toString()},
-      ),
-      onEdit: () => context.pushNamed(
-        AppRouteNames.editProject,
-        pathParameters: {'id': project.id.toString()},
-      ),
-      onArchive: () async {
-        final notifier = ref.read(projectsNotifierProvider.notifier);
-        final isArchiving = project.status == ProjectStatus.active;
-        final confirm = await AppConfirmationDialog.show(
-          context,
-          title: isArchiving
-              ? 'Archive ${project.name}?'
-              : 'Unarchive ${project.name}?',
-          message: isArchiving
-              ? 'Project will be hidden from your active list.'
-              : 'Project will be restored to your active list.',
-          confirmLabel: isArchiving ? 'Archive' : 'Unarchive',
-          onConfirm: () => notifier.archiveProject(project.id),
-        );
-        if (confirm == true && context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                isArchiving
-                    ? '${project.name} archived'
-                    : '${project.name} unarchived',
-              ),
-            ),
-          );
-        }
-      },
-      onDelete: () => _confirmDelete(context, ref),
+      // Selecting a project makes it active and opens its Dashboard.
+      onTap: () => ProjectActions.switchTo(context, ref, project.id),
+      onEdit: () => ProjectActions.edit(context, project),
+      onArchive: () => ProjectActions.archive(context, ref, project),
+      // On the listing we aren't viewing any project's dashboard, so deletion
+      // stays here (Case 1). ProjectActions still clears the persisted default
+      // if this happened to be it.
+      onDelete: () => ProjectActions.delete(context, project),
     );
-  }
-
-  Future<void> _confirmDelete(BuildContext context, WidgetRef ref) async {
-    final confirm = await AppDeleteDialog.show(
-      context,
-      itemName: project.name,
-      onDelete: () {
-        ref.read(projectsNotifierProvider.notifier).deleteProject(project.id);
-      },
-    );
-    if (confirm == true && context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('${project.name} deleted'),
-          backgroundColor: AppColors.error500,
-        ),
-      );
-    }
   }
 }

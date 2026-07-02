@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../navigation/app_router.dart';
 import '../../../../shared/widgets/index.dart';
 import '../../../../theme/app_colors.dart';
 import '../../../../theme/app_spacing.dart';
 import '../../../../theme/app_text_styles.dart';
 import '../../../project/domain/entities/project_entity.dart';
+import '../../../project/presentation/actions/project_actions.dart';
 import '../../../project/presentation/providers/project_providers.dart';
 
 enum _ProjectAction { edit, archive, delete }
@@ -124,29 +124,20 @@ class _ProjectRow extends ConsumerWidget {
     WidgetRef ref,
     _ProjectAction action,
   ) {
-    final notifier = ref.read(projectsNotifierProvider.notifier);
     switch (action) {
       case _ProjectAction.edit:
-        context.pushNamed(
-          AppRouteNames.editProject,
-          pathParameters: {'id': project.id.toString()},
-        );
+        ProjectActions.edit(context, project);
       case _ProjectAction.archive:
-        AppConfirmationDialog.show(
-          context,
-          title: 'Archive project?',
-          message:
-              '"${project.name}" will be hidden from active lists. You can '
-              'still find it here.',
-          confirmLabel: 'Archive',
-          onConfirm: () => notifier.archiveProject(project.id),
-        );
+        ProjectActions.archive(context, ref, project);
       case _ProjectAction.delete:
-        AppDeleteDialog.show(
-          context,
-          itemName: 'project',
-          onDelete: () => notifier.deleteProject(project.id),
+        // Manage Projects lives under the project you came from (`:id`). If that
+        // project is the one being deleted, ProjectActions leaves its context
+        // and returns to the Project Listing (Case 2); deleting any other
+        // project just stays here (Case 1).
+        final activeId = int.tryParse(
+          GoRouterState.of(context).pathParameters['id'] ?? '',
         );
+        ProjectActions.delete(context, project, activeProjectId: activeId);
     }
   }
 }

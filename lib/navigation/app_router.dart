@@ -380,9 +380,23 @@ class _ProjectShell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: child,
-      bottomNavigationBar: _BottomNav(projectId: projectId),
+    final onDashboard =
+        GoRouterState.of(context).uri.toString().contains('/dashboard');
+    // System back: from any non-Dashboard tab, first switch to Dashboard;
+    // from Dashboard, allow the pop (exit the project → project list).
+    return PopScope(
+      canPop: onDashboard,
+      onPopInvokedWithResult: (didPop, _) {
+        if (didPop) return;
+        context.goNamed(
+          AppRouteNames.dashboard,
+          pathParameters: {'id': projectId.toString()},
+        );
+      },
+      child: Scaffold(
+        body: child,
+        bottomNavigationBar: _BottomNav(projectId: projectId),
+      ),
     );
   }
 }
@@ -422,6 +436,12 @@ class _BottomNavState extends ConsumerState<_BottomNav> {
   }
 
   void _onTap(BuildContext context, int index) {
+    // Already on this tab — do nothing. Re-navigating to the same route rebuilds
+    // the destination while the old one is still mounted, which duplicates the
+    // walkthrough GlobalKeys (wt_budgetCard, wt_photosAction) → crash.
+    final current = _locationToIndex(GoRouterState.of(context).uri.toString());
+    if (index == current) return;
+
     final routes = [
       AppRouteNames.dashboard,
       AppRouteNames.expenses,

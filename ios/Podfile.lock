@@ -1200,40 +1200,9 @@ PODS:
     - Flutter
   - device_info_plus (0.0.1):
     - Flutter
-  - DKImagePickerController/Core (4.3.9):
-    - DKImagePickerController/ImageDataManager
-    - DKImagePickerController/Resource
-  - DKImagePickerController/ImageDataManager (4.3.9)
-  - DKImagePickerController/PhotoGallery (4.3.9):
-    - DKImagePickerController/Core
-    - DKPhotoGallery
-  - DKImagePickerController/Resource (4.3.9)
-  - DKPhotoGallery (0.0.19):
-    - DKPhotoGallery/Core (= 0.0.19)
-    - DKPhotoGallery/Model (= 0.0.19)
-    - DKPhotoGallery/Preview (= 0.0.19)
-    - DKPhotoGallery/Resource (= 0.0.19)
-    - SDWebImage
-    - SwiftyGif
-  - DKPhotoGallery/Core (0.0.19):
-    - DKPhotoGallery/Model
-    - DKPhotoGallery/Preview
-    - SDWebImage
-    - SwiftyGif
-  - DKPhotoGallery/Model (0.0.19):
-    - SDWebImage
-    - SwiftyGif
-  - DKPhotoGallery/Preview (0.0.19):
-    - DKPhotoGallery/Model
-    - DKPhotoGallery/Resource
-    - SDWebImage
-    - SwiftyGif
-  - DKPhotoGallery/Resource (0.0.19):
-    - SDWebImage
-    - SwiftyGif
   - file_picker (0.0.1):
-    - DKImagePickerController/PhotoGallery
     - Flutter
+    - FlutterMacOS
   - Firebase/Auth (12.15.0):
     - Firebase/CoreOnly
     - FirebaseAuth (~> 12.15.0)
@@ -1530,7 +1499,6 @@ PODS:
     - SDWebImage/Core (~> 5.17)
   - share_plus (0.0.1):
     - Flutter
-  - SwiftyGif (5.4.5)
   - url_launcher_ios (0.0.1):
     - Flutter
   - webview_flutter_wkwebview (0.0.1):
@@ -1540,7 +1508,7 @@ PODS:
 DEPENDENCIES:
   - cloud_firestore (from `.symlinks/plugins/cloud_firestore/ios`)
   - device_info_plus (from `.symlinks/plugins/device_info_plus/ios`)
-  - file_picker (from `.symlinks/plugins/file_picker/ios`)
+  - file_picker (from `.symlinks/plugins/file_picker/darwin`)
   - firebase_analytics (from `.symlinks/plugins/firebase_analytics/ios`)
   - firebase_auth (from `.symlinks/plugins/firebase_auth/ios`)
   - firebase_core (from `.symlinks/plugins/firebase_core/ios`)
@@ -1561,8 +1529,6 @@ SPEC REPOS:
   trunk:
     - abseil
     - BoringSSL-GRPC
-    - DKImagePickerController
-    - DKPhotoGallery
     - Firebase
     - FirebaseABTesting
     - FirebaseAnalytics
@@ -1592,7 +1558,6 @@ SPEC REPOS:
     - RecaptchaInterop
     - SDWebImage
     - SDWebImageWebPCoder
-    - SwiftyGif
 
 EXTERNAL SOURCES:
   cloud_firestore:
@@ -1600,7 +1565,7 @@ EXTERNAL SOURCES:
   device_info_plus:
     :path: ".symlinks/plugins/device_info_plus/ios"
   file_picker:
-    :path: ".symlinks/plugins/file_picker/ios"
+    :path: ".symlinks/plugins/file_picker/darwin"
   firebase_analytics:
     :path: ".symlinks/plugins/firebase_analytics/ios"
   firebase_auth:
@@ -1637,9 +1602,7 @@ SPEC CHECKSUMS:
   BoringSSL-GRPC: dded2a44897e45f28f08ae87a55ee4bcd19bc508
   cloud_firestore: f7ca38720511e65eede1b19041948ce35f66ebb7
   device_info_plus: bf2e3232933866d73fe290f2942f2156cdd10342
-  DKImagePickerController: 946cec48c7873164274ecc4624d19e3da4c1ef3c
-  DKPhotoGallery: b3834fecb755ee09a593d7c9e389d8b5d6deed60
-  file_picker: b159e0c068aef54932bb15dc9fd1571818edaf49
+  file_picker: e81e2d2db6261a4e98febeae383bd2173ba8b396
   Firebase: a8539b633d474fbeb654c7043f9c1649e274045b
   firebase_analytics: 444603cf97c21326b60115cd18d28f4a56bd78f6
   firebase_auth: b9077bef727b19b519285a98f7b97d2ea78a0d78
@@ -1682,10 +1645,9 @@ SPEC CHECKSUMS:
   SDWebImage: e9fc87c1aab89a8ab1bbd74eba378c6f53be8abf
   SDWebImageWebPCoder: 0e06e365080397465cc73a7a9b472d8a3bd0f377
   share_plus: 8b6f8b3447e494cca5317c8c3073de39b3600d1f
-  SwiftyGif: 706c60cf65fa2bc5ee0313beece843c8eb8194d4
   url_launcher_ios: bb13df5870e8c4234ca12609d04010a21be43dfa
   webview_flutter_wkwebview: 29eb20d43355b48fe7d07113835b9128f84e3af4
 
-PODFILE CHECKSUM: 4b015915ec662986b54bf30ab778da63f7dda016
+PODFILE CHECKSUM: 5588bc0d522fa0685559343ee4439fc89349b7ad
 
 COCOAPODS: 1.16.2

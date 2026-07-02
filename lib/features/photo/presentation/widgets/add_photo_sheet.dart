@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/permissions/permission_service.dart';
 import '../../../../shared/widgets/index.dart';
 import '../../../../theme/app_colors.dart';
 import '../../../../theme/app_spacing.dart';
@@ -169,6 +170,19 @@ class _AddPhotoSheetState extends ConsumerState<_AddPhotoSheet> {
   }
 
   Future<void> _pickFrom({required bool fromCamera}) async {
+    // Just-in-time permission: check/request before opening camera or gallery.
+    final permissions = ref.read(permissionServiceProvider);
+    final allowed = fromCamera
+        ? await permissions.ensureCamera(context)
+        : await permissions.ensureGallery(context);
+    if (!mounted) return;
+    // Denied / sent to Settings → close this sheet so the user returns to a
+    // clean, interactive screen (no stuck modal) instead of a frozen sheet.
+    if (!allowed) {
+      if (Navigator.of(context).canPop()) Navigator.of(context).pop();
+      return;
+    }
+
     setState(() => _busy = true);
     try {
       final service = ref.read(photoPickerServiceProvider);

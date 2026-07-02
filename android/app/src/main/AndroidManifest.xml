@@ -1,6 +1,20 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
-    <!-- Required for the in-app WebView (legal & support pages). -->
+    <!-- Firebase + in-app WebView (legal & support pages). -->
     <uses-permission android:name="android.permission.INTERNET"/>
+
+    <!-- Camera — capturing progress photos. -->
+    <uses-permission android:name="android.permission.CAMERA"/>
+
+    <!-- Gallery: Android 13+ uses granular media; Android ≤12 falls back to
+         READ_EXTERNAL_STORAGE (capped so it isn't requested on 13+). No
+         WRITE_EXTERNAL_STORAGE — backups use app-private dirs + SAF. -->
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32"/>
+
+    <!-- Camera is optional — don't block install on camera-less devices. -->
+    <uses-feature android:name="android.hardware.camera" android:required="false"/>
+
     <application
         android:label="Build Wise"
         android:name="${applicationName}"

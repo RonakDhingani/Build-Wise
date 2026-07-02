@@ -19,6 +19,7 @@ import '../../../onboarding/presentation/walkthrough_controller.dart';
 import '../../../onboarding/presentation/walkthrough_keys.dart';
 import '../../../onboarding/presentation/walkthrough_step.dart';
 import '../providers/dashboard_providers.dart';
+import '../widgets/project_switcher_app_bar.dart';
 
 class DashboardScreen extends ConsumerWidget {
   const DashboardScreen({super.key, required this.projectId});
@@ -96,11 +97,7 @@ class _DashboardBody extends StatelessWidget {
         .toDouble();
 
     return AppScaffold(
-      appBar: AppBarWidget(
-        title: project.name,
-        subtitle: project.location,
-        showBackButton: false,
-      ),
+      appBar: ProjectSwitcherAppBar(project: project),
       body: ListView(
         padding: const EdgeInsets.symmetric(
           horizontal: AppSpacing.pageHorizontal,

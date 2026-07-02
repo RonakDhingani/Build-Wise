@@ -10,6 +10,7 @@ import '../../../../theme/app_spacing.dart';
 import '../../../../theme/app_text_styles.dart';
 import '../../../../utils/validators.dart';
 import '../../domain/entities/project_entity.dart';
+import '../actions/project_actions.dart';
 import '../providers/project_providers.dart';
 
 class EditProjectScreen extends ConsumerStatefulWidget {
@@ -260,44 +261,21 @@ class _EditProjectScreenState extends ConsumerState<EditProjectScreen> {
 
   Future<void> _onArchive() async {
     if (_original == null) return;
-    final isArchiving = _original!.status == ProjectStatus.active;
-    final confirm = await AppConfirmationDialog.show(
-      context,
-      title: isArchiving
-          ? 'Archive ${_original!.name}?'
-          : 'Unarchive ${_original!.name}?',
-      message: isArchiving
-          ? 'Project will be hidden from your active list.'
-          : 'Project will be restored to your active list.',
-      confirmLabel: isArchiving ? 'Archive' : 'Unarchive',
-      onConfirm: () async {
-        await ref
-            .read(projectsNotifierProvider.notifier)
-            .archiveProject(widget.projectId);
-      },
-    );
-    if (confirm == true && mounted) {
-      context.pop();
-    }
+    final confirmed = await ProjectActions.archive(context, ref, _original!);
+    // Leave the edit form for this project once it's archived.
+    if (confirmed && mounted) context.pop();
   }
 
   Future<void> _onDelete() async {
     if (_original == null) return;
-    final confirm = await AppDeleteDialog.show(
+    // The edit form is bound to this project, so deleting it always abandons the
+    // context. Passing its own id triggers the "active project deleted" flow:
+    // ProjectActions returns to the Project Listing and clears the default.
+    await ProjectActions.delete(
       context,
-      itemName: _original!.name,
-      onDelete: () async {
-        await ref
-            .read(projectsNotifierProvider.notifier)
-            .deleteProject(widget.projectId);
-      },
+      _original!,
+      activeProjectId: widget.projectId,
     );
-    if (confirm == true && mounted) {
-      // Pop back to project list
-      while (context.canPop()) {
-        context.pop();
-      }
-    }
   }
 }
 

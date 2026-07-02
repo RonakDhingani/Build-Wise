@@ -3,8 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../constants/app_strings.dart';
-import '../../../../features/onboarding/presentation/walkthrough_controller.dart';
-import '../../../../features/onboarding/presentation/walkthrough_step.dart';
+import '../../../../features/settings/presentation/providers/settings_providers.dart';
 import '../../../../navigation/app_router.dart';
 import '../../../../shared/widgets/index.dart';
 import '../../../../theme/app_colors.dart';
@@ -204,21 +203,20 @@ class _CreateProjectScreenState extends ConsumerState<CreateProjectScreen> {
           .read(projectsNotifierProvider.notifier)
           .createProject(entity);
 
-      if (!mounted) return;
-
       if (created != null) {
-        // During the onboarding tour, open the new project's dashboard so the
-        // walkthrough can resume there; otherwise return to the project list.
-        final touring =
-            ref.read(walkthroughControllerProvider) == WalkStep.createProject;
-        if (touring) {
-          context.goNamed(
-            AppRouteNames.dashboard,
-            pathParameters: {'id': created.id.toString()},
-          );
-        } else {
-          context.goNamed(AppRouteNames.projects);
-        }
+        // Make the new project the active/default one so the app reopens on it,
+        // then land on its Dashboard. Its `:id` drives every project-scoped
+        // provider, so all project data is fresh with no manual refresh. The
+        // Project Listing stays in the back stack (Back returns to it), matching
+        // the onboarding tour flow.
+        await ref
+            .read(settingsNotifierProvider.notifier)
+            .setDefaultProject(created.id);
+        if (!mounted) return;
+        context.goNamed(
+          AppRouteNames.dashboard,
+          pathParameters: {'id': created.id.toString()},
+        );
       }
     } catch (e) {
       if (!mounted) return;
