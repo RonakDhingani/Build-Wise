@@ -146,25 +146,66 @@ class WalkthroughController extends Notifier<WalkStep> {
 
   /// Shows the spotlight for [step] if it is the active step, its target is
   /// mounted, and it isn't already showing. Safe to call every build.
+  ///
+  /// Either [key] (a mounted widget) or [targetPosition] (an explicit screen
+  /// rect, e.g. a computed bottom-nav cell) must be provided. The content card
+  /// is placed on whichever side of the target has more room and is capped to
+  /// the space available there, so it is never clipped off-screen on any
+  /// device / notch / status-bar combination.
   void maybeShowCoach(
     BuildContext context,
     WalkStep step, {
-    required GlobalKey key,
+    GlobalKey? key,
+    TargetPosition? targetPosition,
     ShapeLightFocus shape = ShapeLightFocus.RRect,
-    ContentAlign align = ContentAlign.bottom,
+    double radius = 12,
+    double focusPadding = 10,
   }) {
+    assert(key != null || targetPosition != null);
     if (state != step || _shown == step) return;
-    if (key.currentContext == null) return; // target not laid out yet
+
+    final rect = _targetRect(key, targetPosition);
+    if (rect == null) return; // target not laid out yet — retried next build
     _shown = step;
+
+    final media = MediaQuery.of(context);
+    final screenH = media.size.height;
+    final safeTop = media.padding.top;
+    final safeBottom = media.padding.bottom;
+    const gap = 14.0; // space between the focus ring and the card
+
+    // Pick the side with more vertical room, then cap the card to it so the
+    // package (which anchors content by a single edge inside a clipping Stack)
+    // can never push it past a screen edge.
+    final spaceAbove = rect.top - safeTop - focusPadding;
+    final spaceBelow = screenH - safeBottom - rect.bottom - focusPadding;
+    final placeBelow = spaceBelow >= spaceAbove;
+    final rawSpace = placeBelow ? spaceBelow : spaceAbove;
+    final maxCardH = (rawSpace - gap - 16).clamp(96.0, screenH * 0.6);
+
+    final position = placeBelow
+        ? CustomTargetContentPosition(
+            top: rect.bottom + focusPadding + gap,
+            left: 0,
+            right: 0,
+          )
+        : CustomTargetContentPosition(
+            bottom: (screenH - rect.top) + focusPadding + gap,
+            left: 0,
+            right: 0,
+          );
 
     final gated = step == WalkStep.createProject;
     final content = TargetContent(
-      align: align,
+      align: ContentAlign.custom,
+      customPosition: position,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       builder: (_, _) => WalkthroughCard(
         step: step,
         onSkip: skip,
         onNext: gated ? null : advance,
         hint: gated ? 'Tap + to continue' : null,
+        maxHeight: maxCardH,
       ),
     );
 
@@ -173,8 +214,10 @@ class WalkthroughController extends Notifier<WalkStep> {
         TargetFocus(
           identify: step.name,
           keyTarget: key,
+          targetPosition: key == null ? targetPosition : null,
           shape: shape,
-          radius: 12,
+          radius: radius,
+          paddingFocus: focusPadding,
           enableTargetTab: gated,
           enableOverlayTab: false,
           contents: [content],
@@ -187,6 +230,21 @@ class WalkthroughController extends Notifier<WalkStep> {
       onClickTarget: gated ? (_) => _onCreateTap() : null,
     );
     _coach!.show(context: context, rootOverlay: true);
+  }
+
+  /// Global (root-overlay) screen rect of the target, or null if not yet laid
+  /// out. Matches the coordinate space the coach uses (`rootOverlay: true`).
+  Rect? _targetRect(GlobalKey? key, TargetPosition? targetPosition) {
+    if (key != null) {
+      final ctx = key.currentContext;
+      final box = ctx?.findRenderObject() as RenderBox?;
+      if (box == null || !box.hasSize) return null;
+      return box.localToGlobal(Offset.zero) & box.size;
+    }
+    if (targetPosition != null) {
+      return targetPosition.offset & targetPosition.size;
+    }
+    return null;
   }
 
   void _showInfoDialog(

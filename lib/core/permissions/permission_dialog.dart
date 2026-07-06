@@ -11,9 +11,10 @@ import 'permission_service.dart';
 class PermissionDialog {
   PermissionDialog._();
 
-  static Future<void> show(BuildContext context, AppPermissionType type) {
+  /// Returns `true` if the user tapped "Open Settings", `false` otherwise.
+  static Future<bool> show(BuildContext context, AppPermissionType type) async {
     final copy = PermissionHelper.rationale(type);
-    return showDialog<void>(
+    final result = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text(copy.title, style: AppTextStyles.titleLarge),
@@ -24,12 +25,17 @@ class PermissionDialog {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(ctx).pop(),
+            onPressed: () => Navigator.of(ctx).pop(false),
             child: const Text('Not Now'),
           ),
           TextButton(
-            onPressed: () {
-              Navigator.of(ctx).pop();
+            onPressed: () async {
+              Navigator.of(ctx).pop(true);
+              // Delay until the dismiss animation completes before switching to
+              // Settings. Calling openAppSettings() mid-animation blocks the
+              // iOS main thread (mach_msg2_trap) and causes a SIGKILL/freeze on
+              // return.
+              await Future<void>.delayed(const Duration(milliseconds: 300));
               openAppSettings();
             },
             style: TextButton.styleFrom(foregroundColor: LightThemeColors.primary),
@@ -41,5 +47,6 @@ class PermissionDialog {
         ],
       ),
     );
+    return result == true;
   }
 }

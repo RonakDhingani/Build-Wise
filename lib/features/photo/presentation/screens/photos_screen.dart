@@ -18,11 +18,7 @@ import '../widgets/add_photo_sheet.dart';
 enum _ViewMode { grid, timeline }
 
 class PhotosScreen extends ConsumerStatefulWidget {
-  const PhotosScreen({
-    super.key,
-    required this.projectId,
-    this.stageId,
-  });
+  const PhotosScreen({super.key, required this.projectId, this.stageId});
 
   final int projectId;
   final int? stageId;
@@ -41,7 +37,8 @@ class _PhotosScreenState extends ConsumerState<PhotosScreen> {
     final async = ref.watch(photosNotifierProvider(widget.projectId));
 
     // Build stageId -> name lookup from stages (used for tile labels + timeline).
-    final stages = ref
+    final stages =
+        ref
             .watch(stagesNotifierProvider(widget.projectId))
             .valueOrNull
             ?.stages ??
@@ -133,8 +130,9 @@ class _PhotosScreenState extends ConsumerState<PhotosScreen> {
                 : Icons.grid_view_rounded,
           ),
           onPressed: () => setState(() {
-            _mode =
-                _mode == _ViewMode.grid ? _ViewMode.timeline : _ViewMode.grid;
+            _mode = _mode == _ViewMode.grid
+                ? _ViewMode.timeline
+                : _ViewMode.grid;
           }),
         ),
       ],
@@ -202,8 +200,9 @@ class _PhotosScreenState extends ConsumerState<PhotosScreen> {
       context,
       itemName: count == 1 ? 'photo' : '$count photos',
       onDelete: () async {
-        final notifier =
-            ref.read(photosNotifierProvider(widget.projectId).notifier);
+        final notifier = ref.read(
+          photosNotifierProvider(widget.projectId).notifier,
+        );
         for (final id in _selected.toList()) {
           await notifier.deletePhoto(id);
         }
@@ -323,8 +322,10 @@ class _PhotoTile extends StatelessWidget {
                 right: 0,
                 bottom: 0,
                 child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 6,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       begin: Alignment.bottomCenter,
@@ -380,8 +381,9 @@ class _PhotoTile extends StatelessWidget {
                     color: LightThemeColors.cardBg,
                     shadows: [
                       Shadow(
-                          color: AppColors.black.withValues(alpha: 0.54),
-                          blurRadius: 4),
+                        color: AppColors.black.withValues(alpha: 0.54),
+                        blurRadius: 4,
+                      ),
                     ],
                   ),
                 ),
@@ -440,8 +442,9 @@ class _TimelineView extends StatelessWidget {
       itemBuilder: (context, i) {
         final key = keys[i];
         final items = groups[key]!;
-        final name =
-            key == null ? 'Unassigned' : (stageNames[key] ?? 'Stage $key');
+        final name = key == null
+            ? 'Unassigned'
+            : (stageNames[key] ?? 'Stage $key');
         return _TimelineGroup(
           stageName: name,
           photos: items,
@@ -495,10 +498,7 @@ class _TimelineGroup extends StatelessWidget {
               ),
               if (!isLast)
                 Expanded(
-                  child: Container(
-                    width: 2,
-                    color: LightThemeColors.border,
-                  ),
+                  child: Container(width: 2, color: LightThemeColors.border),
                 ),
             ],
           ),
@@ -513,10 +513,7 @@ class _TimelineGroup extends StatelessWidget {
                   Row(
                     children: [
                       Expanded(
-                        child: Text(
-                          stageName,
-                          style: AppTextStyles.titleSmall,
-                        ),
+                        child: Text(stageName, style: AppTextStyles.titleSmall),
                       ),
                       Text(
                         '${photos.length} '
@@ -547,17 +544,20 @@ class _TimelineGroup extends StatelessWidget {
                             duration: const Duration(milliseconds: 150),
                             curve: Curves.easeOut,
                             decoration: BoxDecoration(
-                              borderRadius:
-                                  BorderRadius.circular(AppDimensions.radiusMd),
+                              borderRadius: BorderRadius.circular(
+                                AppDimensions.radiusMd,
+                              ),
                               border: isSelected
                                   ? Border.all(
                                       color: LightThemeColors.primary,
-                                      width: 3)
+                                      width: 3,
+                                    )
                                   : null,
                             ),
                             child: ClipRRect(
-                              borderRadius:
-                                  BorderRadius.circular(AppDimensions.radiusSm),
+                              borderRadius: BorderRadius.circular(
+                                AppDimensions.radiusSm,
+                              ),
                               child: SizedBox(
                                 width: 84,
                                 height: 84,
@@ -572,11 +572,13 @@ class _TimelineGroup extends StatelessWidget {
                                             gaplessPlayback: true,
                                           )
                                         : Container(
-                                            color: AppColors.neutral200),
+                                            color: AppColors.neutral200,
+                                          ),
                                     if (selecting) ...[
                                       AnimatedOpacity(
-                                        duration:
-                                            const Duration(milliseconds: 150),
+                                        duration: const Duration(
+                                          milliseconds: 150,
+                                        ),
                                         opacity: isSelected ? 1 : 0,
                                         child: Container(
                                           color: LightThemeColors.primary
@@ -590,14 +592,16 @@ class _TimelineGroup extends StatelessWidget {
                                           isSelected
                                               ? Icons.check_circle_rounded
                                               : Icons
-                                                  .radio_button_unchecked_rounded,
+                                                    .radio_button_unchecked_rounded,
                                           size: 20,
                                           color: LightThemeColors.cardBg,
                                           shadows: [
                                             Shadow(
-                                                color: AppColors.black
-                                                    .withValues(alpha: 0.54),
-                                                blurRadius: 4),
+                                              color: AppColors.black.withValues(
+                                                alpha: 0.54,
+                                              ),
+                                              blurRadius: 4,
+                                            ),
                                           ],
                                         ),
                                       ),

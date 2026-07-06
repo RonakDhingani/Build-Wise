@@ -12,7 +12,6 @@ import '../../../../utils/currency_formatter.dart';
 import '../../../../utils/analytics.dart';
 import '../../../../utils/date_formatter.dart';
 import '../../../../utils/trend_stats.dart';
-import 'package:tutorial_coach_mark/tutorial_coach_mark.dart';
 
 import '../../../onboarding/presentation/walkthrough_controller.dart';
 import '../../../onboarding/presentation/walkthrough_keys.dart';
@@ -38,7 +37,6 @@ class ExpenseScreen extends ConsumerWidget {
               context,
               WalkStep.addExpense,
               key: WalkthroughKeys.addExpense,
-              align: ContentAlign.top,
             );
       });
     }
@@ -234,22 +232,46 @@ class _BodyState extends ConsumerState<_Body> {
                       ? 'No ${_payFilter!.label} expenses yet.'
                       : 'Tap Add Expense to record your first one.',
                 )
-              : ListView(
-                  padding: const EdgeInsets.fromLTRB(
-                    AppSpacing.pageHorizontal,
-                    AppSpacing.xl,
-                    AppSpacing.pageHorizontal,
-                    AppSpacing.lg,
-                  ),
-                  children: [
-                    const SectionHeader(
-                        title: 'Transactions', padding: EdgeInsets.zero),
-                    const SizedBox(height: AppSpacing.md),
-                    ..._buildGroupedRows(context, state, filtered),
-                    const SizedBox(height: AppSpacing.xl),
-                    ..._analyticsSection(state),
-                  ],
-                ),
+              : Builder(builder: (context) {
+                  // Row *data* is computed eagerly (cheap — no widgets built),
+                  // but each row's actual Widget is only built lazily by
+                  // itemBuilder as it scrolls into view. The unbounded part
+                  // of this list is the expense rows; the analytics charts
+                  // below them are few and fixed-size, so they're built once
+                  // and indexed into rather than made lazy too.
+                  final groupedItems = _groupedRowItems(filtered);
+                  final analyticsWidgets = _analyticsSection(state);
+                  const headerCount = 2; // SectionHeader + spacer
+                  final rowsEnd = headerCount + groupedItems.length;
+                  final itemCount = rowsEnd + 1 + analyticsWidgets.length;
+
+                  return ListView.builder(
+                    padding: const EdgeInsets.fromLTRB(
+                      AppSpacing.pageHorizontal,
+                      AppSpacing.xl,
+                      AppSpacing.pageHorizontal,
+                      AppSpacing.lg,
+                    ),
+                    itemCount: itemCount,
+                    itemBuilder: (context, index) {
+                      if (index == 0) {
+                        return const SectionHeader(
+                            title: 'Transactions', padding: EdgeInsets.zero);
+                      }
+                      if (index == 1) {
+                        return const SizedBox(height: AppSpacing.md);
+                      }
+                      if (index < rowsEnd) {
+                        return _buildRowItem(
+                            context, state, groupedItems[index - headerCount]);
+                      }
+                      if (index == rowsEnd) {
+                        return const SizedBox(height: AppSpacing.xl);
+                      }
+                      return analyticsWidgets[index - rowsEnd - 1];
+                    },
+                  );
+                }),
         ),
         KeyedSubtree(
           key: WalkthroughKeys.addExpense,
@@ -321,51 +343,58 @@ class _BodyState extends ConsumerState<_Body> {
     ];
   }
 
-  List<Widget> _buildGroupedRows(
-    BuildContext context,
-    ExpenseState state,
-    List<ExpenseEntity> items,
-  ) {
-    final rows = <Widget>[];
+  /// Cheap data pass (no widgets built) that inserts a date-header marker
+  /// wherever the day label changes. The actual header/row widgets are built
+  /// lazily, one at a time, by [_buildRowItem].
+  List<_ExpenseRowItem> _groupedRowItems(List<ExpenseEntity> items) {
+    final rows = <_ExpenseRowItem>[];
     String? lastLabel;
     for (final e in items) {
       final label = _dayLabel(e.date);
       if (label != lastLabel) {
-        rows.add(
-          Padding(
-            padding: EdgeInsets.only(
-              top: lastLabel == null ? 0 : AppSpacing.lg,
-              bottom: AppSpacing.md,
-            ),
-            child: Text(
-              label,
-              style: AppTextStyles.titleSmall.copyWith(
-                color: LightThemeColors.textSecondary,
-              ),
-            ),
-          ),
-        );
+        rows.add(_ExpenseDateHeader(label, isFirst: lastLabel == null));
         lastLabel = label;
       }
-      final cat = state.categoryOf(e.categoryId);
-      rows.add(
-        _ExpenseRow(
-          color: cat?.color ?? LightThemeColors.primary,
-          category: cat?.name ?? 'Uncategorized',
-          description: e.description,
-          amount: CurrencyFormatter.format(e.amount),
-          payment: e.paymentMethod.label,
-          onTap: () => context.pushNamed(
-            AppRouteNames.expenseDetail,
-            pathParameters: {
-              'id': widget.projectId.toString(),
-              'expenseId': e.id.toString(),
-            },
+      rows.add(_ExpenseRowEntry(e));
+    }
+    return rows;
+  }
+
+  Widget _buildRowItem(
+    BuildContext context,
+    ExpenseState state,
+    _ExpenseRowItem item,
+  ) {
+    if (item is _ExpenseDateHeader) {
+      return Padding(
+        padding: EdgeInsets.only(
+          top: item.isFirst ? 0 : AppSpacing.lg,
+          bottom: AppSpacing.md,
+        ),
+        child: Text(
+          item.label,
+          style: AppTextStyles.titleSmall.copyWith(
+            color: LightThemeColors.textSecondary,
           ),
         ),
       );
     }
-    return rows;
+    final e = (item as _ExpenseRowEntry).expense;
+    final cat = state.categoryOf(e.categoryId);
+    return _ExpenseRow(
+      color: cat?.color ?? LightThemeColors.primary,
+      category: cat?.name ?? 'Uncategorized',
+      description: e.description,
+      amount: CurrencyFormatter.format(e.amount),
+      payment: e.paymentMethod.label,
+      onTap: () => context.pushNamed(
+        AppRouteNames.expenseDetail,
+        pathParameters: {
+          'id': widget.projectId.toString(),
+          'expenseId': e.id.toString(),
+        },
+      ),
+    );
   }
 
   String _dayLabel(DateTime d) {
@@ -377,6 +406,19 @@ class _BodyState extends ConsumerState<_Body> {
     if (diff == 1) return 'Yesterday';
     return DateFormatter.formatFull(d);
   }
+}
+
+sealed class _ExpenseRowItem {}
+
+class _ExpenseDateHeader extends _ExpenseRowItem {
+  _ExpenseDateHeader(this.label, {required this.isFirst});
+  final String label;
+  final bool isFirst;
+}
+
+class _ExpenseRowEntry extends _ExpenseRowItem {
+  _ExpenseRowEntry(this.expense);
+  final ExpenseEntity expense;
 }
 
 class _ExpenseRow extends StatelessWidget {

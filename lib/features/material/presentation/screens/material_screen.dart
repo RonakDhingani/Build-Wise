@@ -272,36 +272,55 @@ class _BodyState extends ConsumerState<_Body> {
                       ? 'No materials in this state.'
                       : 'Tap Add Material to add your first one.',
                 )
-              : ListView(
-                  padding: const EdgeInsets.fromLTRB(
-                    AppSpacing.pageHorizontal,
-                    AppSpacing.xl,
-                    AppSpacing.pageHorizontal,
-                    AppSpacing.lg,
-                  ),
-                  children: [
-                    const SectionHeader(
-                        title: 'Materials', padding: EdgeInsets.zero),
-                    const SizedBox(height: AppSpacing.md),
-                    for (final m in filtered)
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: AppSpacing.md),
-                        child: _MaterialRow(
-                          material: m,
-                          status: _statusOf(m),
-                          onTap: () => context.pushNamed(
-                            AppRouteNames.materialDetail,
-                            pathParameters: {
-                              'id': widget.projectId.toString(),
-                              'materialId': m.id.toString(),
-                            },
+              : Builder(builder: (context) {
+                  // Only the material rows are built lazily (unbounded, one
+                  // per material) — the analytics charts below are few and
+                  // fixed-size, built once and indexed into.
+                  final analyticsWidgets = _analyticsSection(materials);
+                  const headerCount = 2; // SectionHeader + spacer
+                  final rowsEnd = headerCount + filtered.length;
+                  final itemCount = rowsEnd + 1 + analyticsWidgets.length;
+
+                  return ListView.builder(
+                    padding: const EdgeInsets.fromLTRB(
+                      AppSpacing.pageHorizontal,
+                      AppSpacing.xl,
+                      AppSpacing.pageHorizontal,
+                      AppSpacing.lg,
+                    ),
+                    itemCount: itemCount,
+                    itemBuilder: (context, index) {
+                      if (index == 0) {
+                        return const SectionHeader(
+                            title: 'Materials', padding: EdgeInsets.zero);
+                      }
+                      if (index == 1) {
+                        return const SizedBox(height: AppSpacing.md);
+                      }
+                      if (index < rowsEnd) {
+                        final m = filtered[index - headerCount];
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: AppSpacing.md),
+                          child: _MaterialRow(
+                            material: m,
+                            status: _statusOf(m),
+                            onTap: () => context.pushNamed(
+                              AppRouteNames.materialDetail,
+                              pathParameters: {
+                                'id': widget.projectId.toString(),
+                                'materialId': m.id.toString(),
+                              },
+                            ),
                           ),
-                        ),
-                      ),
-                    const SizedBox(height: AppSpacing.xl),
-                    ..._analyticsSection(materials),
-                  ],
-                ),
+                        );
+                      }
+                      if (index == rowsEnd) {
+                        return const SizedBox(height: AppSpacing.xl);
+                      }
+                      return analyticsWidgets[index - rowsEnd - 1];
+                    },
+                  );
+                }),
         ),
         AppBottomButton(
           label: '+  Add Material',

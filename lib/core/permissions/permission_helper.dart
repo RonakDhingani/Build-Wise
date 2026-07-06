@@ -13,8 +13,6 @@ abstract class PermissionHelper {
     switch (type) {
       case AppPermissionType.camera:
         return 'Camera';
-      case AppPermissionType.photos:
-        return 'Photos';
     }
   }
 
@@ -26,13 +24,6 @@ abstract class PermissionHelper {
           message:
               'BuildWise needs camera access to capture progress photos. '
               'Enable Camera for BuildWise in Settings to continue.',
-        );
-      case AppPermissionType.photos:
-        return (
-          title: 'Photo Access Needed',
-          message:
-              'BuildWise needs photo access to attach images from your gallery. '
-              'Enable Photos for BuildWise in Settings to continue.',
         );
     }
   }

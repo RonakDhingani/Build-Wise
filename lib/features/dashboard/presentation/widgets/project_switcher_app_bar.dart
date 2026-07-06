@@ -172,11 +172,23 @@ class _SwitcherTitleState extends ConsumerState<_SwitcherTitle>
     with SingleTickerProviderStateMixin {
   final _link = LayerLink();
   final _portal = OverlayPortalController();
-  late final AnimationController _anim = AnimationController(
-    vsync: this,
-    duration: const Duration(milliseconds: 180),
-    reverseDuration: const Duration(milliseconds: 140),
-  );
+  late final AnimationController _anim;
+
+  @override
+  void initState() {
+    super.initState();
+    // Construct eagerly, not via a lazy `late final` initializer: `_anim` is
+    // only otherwise touched when the dropdown is opened (_open/_close), so a
+    // title that's disposed before ever being tapped (e.g. switching project
+    // replaces this widget) would lazily construct it for the first time
+    // inside dispose() — needing a vsync/TickerMode lookup on an element
+    // that's already being torn down ("deactivated ancestor" crash).
+    _anim = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 180),
+      reverseDuration: const Duration(milliseconds: 140),
+    );
+  }
 
   @override
   void dispose() {
@@ -191,8 +203,23 @@ class _SwitcherTitleState extends ConsumerState<_SwitcherTitle>
 
   void _close() {
     _anim.reverse().whenComplete(() {
-      if (mounted && _portal.isShowing) _portal.hide();
+      // If _open() re-triggered forward() before this reverse finished, the
+      // cancelled TickerFuture still completes and this stale callback would
+      // otherwise hide the freshly-reopened dropdown. Only hide if the
+      // animation is still actually at rest (dismissed).
+      if (mounted && _anim.status == AnimationStatus.dismissed && _portal.isShowing) {
+        _portal.hide();
+      }
     });
+  }
+
+  /// Remove the dropdown immediately, no exit animation. Used when a selection
+  /// triggers navigation — animating the overlay out while the route (and this
+  /// State's AnimationController) is being torn down races the two and can build
+  /// a disposed element. Instant dismiss sidesteps it.
+  void _dismissNow() {
+    _anim.value = 0;
+    if (_portal.isShowing) _portal.hide();
   }
 
   @override
@@ -298,15 +325,16 @@ class _SwitcherTitleState extends ConsumerState<_SwitcherTitle>
                 width: width,
                 currentId: widget.project.id,
                 onSelect: (id) {
-                  _close();
-                  // Use the stable title context (not the transient overlay one)
-                  // for navigation.
+                  // Dismiss instantly, then switch. switchTo defers the route
+                  // change to post-frame so the page swap stays clean. Use the
+                  // stable title context, not the transient overlay one.
+                  _dismissNow();
                   if (id != widget.project.id) {
-                    ProjectActions.switchTo(context, ref, id);
+                    ProjectActions.switchTo(context, id);
                   }
                 },
                 onAddNew: () {
-                  _close();
+                  _dismissNow();
                   ProjectActions.create(context);
                 },
               ),

@@ -41,7 +41,7 @@ class ProjectSelectionScreen extends ConsumerWidget {
           WalkStep.createProject,
           key: WalkthroughKeys.createProject,
           shape: ShapeLightFocus.RRect,
-          align: ContentAlign.top,
+          radius: 16,
         );
       }
     });
@@ -294,8 +294,11 @@ class _ProjectItem extends ConsumerWidget {
     return ProjectCard(
       project: project,
       currencySymbol: currencySymbol,
-      // Selecting a project makes it active and opens its Dashboard.
-      onTap: () => ProjectActions.switchTo(context, ref, project.id),
+      // Opens the project's Dashboard (doesn't change the default project).
+      onTap: () => context.goNamed(
+        AppRouteNames.dashboard,
+        pathParameters: {'id': project.id.toString()},
+      ),
       onEdit: () => ProjectActions.edit(context, project),
       onArchive: () => ProjectActions.archive(context, ref, project),
       // On the listing we aren't viewing any project's dashboard, so deletion

@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../constants/app_strings.dart';
-import '../../../../features/settings/presentation/providers/settings_providers.dart';
 import '../../../../navigation/app_router.dart';
 import '../../../../shared/widgets/index.dart';
 import '../../../../theme/app_colors.dart';
@@ -203,20 +202,26 @@ class _CreateProjectScreenState extends ConsumerState<CreateProjectScreen> {
           .read(projectsNotifierProvider.notifier)
           .createProject(entity);
 
-      if (created != null) {
-        // Make the new project the active/default one so the app reopens on it,
-        // then land on its Dashboard. Its `:id` drives every project-scoped
-        // provider, so all project data is fresh with no manual refresh. The
-        // Project Listing stays in the back stack (Back returns to it), matching
-        // the onboarding tour flow.
-        await ref
-            .read(settingsNotifierProvider.notifier)
-            .setDefaultProject(created.id);
-        if (!mounted) return;
-        context.goNamed(
-          AppRouteNames.dashboard,
-          pathParameters: {'id': created.id.toString()},
-        );
+      if (created != null && mounted) {
+        // Open the new project's Dashboard. Its `:id` drives every
+        // project-scoped provider, so all project data is fresh with no
+        // manual refresh. The Project Listing stays in the back stack (Back
+        // returns to it), matching the onboarding tour flow. This does NOT
+        // persist as the default project — that's only ever set from
+        // Settings → Default Project.
+        //
+        // Defer the navigation to after this frame: creating the project
+        // just wrote `projectsNotifierProvider`, which the currently-mounted
+        // Dashboard watches. Swapping the Dashboard Page in the same frame as
+        // that rebuild corrupts the element tree ("dirty widget in the wrong
+        // build scope"). Post-frame lets it settle.
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!mounted) return;
+          context.goNamed(
+            AppRouteNames.dashboard,
+            pathParameters: {'id': created.id.toString()},
+          );
+        });
       }
     } catch (e) {
       if (!mounted) return;

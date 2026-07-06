@@ -1,4 +1,4 @@
-import 'dart:io';
+ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -46,22 +46,38 @@ class _AddPhotoSheet extends ConsumerStatefulWidget {
   ConsumerState<_AddPhotoSheet> createState() => _AddPhotoSheetState();
 }
 
-class _AddPhotoSheetState extends ConsumerState<_AddPhotoSheet> {
+class _AddPhotoSheetState extends ConsumerState<_AddPhotoSheet>
+    with WidgetsBindingObserver {
   PhotoPickResult? _pick;
   int? _stageId;
   final _noteController = TextEditingController();
   bool _busy = false;
 
+  // Set to true when the user taps "Open Settings" in the permission dialog.
+  // On the next app resume, _pickFrom is retried automatically.
+  bool _awaitingSettingsReturn = false;
+  bool _awaitFromCamera = false;
+
   @override
   void initState() {
     super.initState();
     _stageId = widget.presetStageId;
+    WidgetsBinding.instance.addObserver(this);
   }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _noteController.dispose();
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed && _awaitingSettingsReturn) {
+      _awaitingSettingsReturn = false;
+      _pickFrom(fromCamera: _awaitFromCamera);
+    }
   }
 
   @override
@@ -170,17 +186,36 @@ class _AddPhotoSheetState extends ConsumerState<_AddPhotoSheet> {
   }
 
   Future<void> _pickFrom({required bool fromCamera}) async {
-    // Just-in-time permission: check/request before opening camera or gallery.
-    final permissions = ref.read(permissionServiceProvider);
-    final allowed = fromCamera
-        ? await permissions.ensureCamera(context)
-        : await permissions.ensureGallery(context);
-    if (!mounted) return;
-    // Denied / sent to Settings → close this sheet so the user returns to a
-    // clean, interactive screen (no stuck modal) instead of a frozen sheet.
-    if (!allowed) {
-      if (Navigator.of(context).canPop()) Navigator.of(context).pop();
-      return;
+    // Camera capture genuinely needs the CAMERA runtime permission, so it's
+    // gated up front. Gallery is NOT gated here: image_picker's system photo
+    // picker (Android Photo Picker / iOS PHPicker) runs out-of-process and
+    // needs no runtime permission on either platform — requesting
+    // Permission.photos first only prompted for access the picker never
+    // uses, and a user declining that unnecessary prompt made "Choose from
+    // Gallery" silently do nothing.
+    if (fromCamera) {
+      bool wentToSettings = false;
+      final allowed = await ref.read(permissionServiceProvider).ensureCamera(
+            context,
+            onOpenedSettings: () => wentToSettings = true,
+          );
+      if (!mounted) return;
+      if (!allowed) {
+        if (wentToSettings) {
+          // Keep the sheet open and auto-retry once the user returns from
+          // Settings (didChangeAppLifecycleState). If iOS kills the app for
+          // the permission change instead of just backgrounding it, this
+          // sheet is simply gone on relaunch — the app cold-starts normally.
+          setState(() {
+            _awaitingSettingsReturn = true;
+            _awaitFromCamera = true;
+          });
+        } else {
+          // User dismissed "Not Now" — close the sheet.
+          if (Navigator.of(context).canPop()) Navigator.of(context).pop();
+        }
+        return;
+      }
     }
 
     setState(() => _busy = true);

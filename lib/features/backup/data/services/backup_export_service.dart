@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:archive/archive.dart';
+import 'package:intl/intl.dart';
 import 'package:isar/isar.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
@@ -62,13 +63,25 @@ class BackupExportService {
 
     // 2. Load related data scoped to those projects.
     final stages = await _filterByProject(
-        _isar.stageModels.where().findAll(), projectIds, (m) => m.projectId);
+      _isar.stageModels.where().findAll(),
+      projectIds,
+      (m) => m.projectId,
+    );
     final expenses = await _filterByProject(
-        _isar.expenseModels.where().findAll(), projectIds, (m) => m.projectId);
+      _isar.expenseModels.where().findAll(),
+      projectIds,
+      (m) => m.projectId,
+    );
     final materials = await _filterByProject(
-        _isar.materialModels.where().findAll(), projectIds, (m) => m.projectId);
+      _isar.materialModels.where().findAll(),
+      projectIds,
+      (m) => m.projectId,
+    );
     final photos = await _filterByProject(
-        _isar.photoModels.where().findAll(), projectIds, (m) => m.projectId);
+      _isar.photoModels.where().findAll(),
+      projectIds,
+      (m) => m.projectId,
+    );
 
     // Categories are global master data — exported in full so expense
     // references resolve on import regardless of scope.
@@ -81,8 +94,12 @@ class BackupExportService {
     // Projects (+ cover images).
     final projectMaps = projects.map((p) {
       final map = BackupSerializer.projectToMap(p);
-      map['coverImagePath'] =
-          _archiveFile(archive, p.id, BackupFormat.subCover, p.coverImagePath);
+      map['coverImagePath'] = _archiveFile(
+        archive,
+        p.id,
+        BackupFormat.subCover,
+        p.coverImagePath,
+      );
       return map;
     }).toList();
 
@@ -93,7 +110,11 @@ class BackupExportService {
     final expenseMaps = expenses.map((e) {
       final map = BackupSerializer.expenseToMap(e);
       map['billImagePath'] = _archiveFile(
-          archive, e.projectId, BackupFormat.subBills, e.billImagePath);
+        archive,
+        e.projectId,
+        BackupFormat.subBills,
+        e.billImagePath,
+      );
       return map;
     }).toList();
 
@@ -109,14 +130,24 @@ class BackupExportService {
       }
       final map = BackupSerializer.photoToMap(photo);
       map['filePath'] = _archiveFile(
-          archive, photo.projectId, BackupFormat.subPhotos, photo.filePath);
+        archive,
+        photo.projectId,
+        BackupFormat.subPhotos,
+        photo.filePath,
+      );
       map['thumbnailPath'] = _archiveFile(
-          archive, photo.projectId, BackupFormat.subThumbs, photo.thumbnailPath);
+        archive,
+        photo.projectId,
+        BackupFormat.subThumbs,
+        photo.thumbnailPath,
+      );
       photoMaps.add(map);
     }
 
     // Categories.
-    final categoryMaps = categories.map(BackupSerializer.categoryToMap).toList();
+    final categoryMaps = categories
+        .map(BackupSerializer.categoryToMap)
+        .toList();
 
     // 4. Manifest.
     final counts = BackupCounts(
@@ -220,22 +251,27 @@ class BackupExportService {
 
   String _buildFileName(BackupScope scope, List<ProjectModel> projects) {
     final now = DateTime.now();
-    final stamp = '${now.year}${_pad2(now.month)}${_pad2(now.day)}'
-        '_${_pad2(now.hour)}${_pad2(now.minute)}${_pad2(now.second)}';
-    if (scope == BackupScope.allProjects) {
-      return 'buildwise_all_projects_$stamp.zip';
-    }
-    final slug = _slug(projects.first.name);
-    return 'buildwise_${slug}_$stamp.zip';
+    final date = DateFormat('dd MMM yyyy').format(now); // 02 Jul 2026
+
+    final projectName = scope == BackupScope.allProjects
+        ? 'All Projects'
+        : _sanitizeFileName(projects.first.name);
+
+    return 'Backup "$projectName" $date.zip';
   }
 
-  String _pad2(int n) => n.toString().padLeft(2, '0');
+  String _sanitizeFileName(String name) {
+    // Remove characters that are invalid in file names
+    return name.replaceAll(RegExp(r'[\\/:*?"<>|]'), '').trim();
+  }
 
-  String _slug(String name) {
+  // String _pad2(int n) => n.toString().padLeft(2, '0');
+
+  /*String _slug(String name) {
     final s = name
         .toLowerCase()
         .replaceAll(RegExp(r'[^a-z0-9]+'), '_')
         .replaceAll(RegExp(r'^_+|_+$'), '');
     return s.isEmpty ? 'project' : s;
-  }
+  }*/
 }

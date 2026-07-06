@@ -16,6 +16,7 @@ class WalkthroughCard extends StatelessWidget {
     this.onNext,
     this.nextLabel = 'Next',
     this.hint,
+    this.maxHeight,
   });
 
   final WalkStep step;
@@ -29,10 +30,20 @@ class WalkthroughCard extends StatelessWidget {
   /// Optional helper line shown in place of the Next button (gated steps).
   final String? hint;
 
+  /// Hard cap on the card height for the current placement. When the content
+  /// would exceed it (very small screens / large fonts) the card scrolls
+  /// internally instead of overflowing off-screen.
+  final double? maxHeight;
+
   @override
   Widget build(BuildContext context) {
-    return Container(
-      constraints: const BoxConstraints(maxWidth: 360),
+    // Fit within the viewport width too: full-width on phones, capped on
+    // tablets. Leaves room for the coach's own horizontal padding.
+    final availWidth = MediaQuery.of(context).size.width - 48;
+    final card = Container(
+      constraints: BoxConstraints(
+        maxWidth: availWidth < 360 ? availWidth : 360,
+      ),
       padding: const EdgeInsets.all(AppSpacing.lg),
       decoration: BoxDecoration(
         color: LightThemeColors.surface,
@@ -110,13 +121,15 @@ class WalkthroughCard extends StatelessWidget {
                     ),
                     decoration: BoxDecoration(
                       color: LightThemeColors.primary,
-                      borderRadius:
-                          BorderRadius.circular(AppDimensions.radiusMd),
+                      borderRadius: BorderRadius.circular(
+                        AppDimensions.radiusMd,
+                      ),
                     ),
                     child: Text(
                       nextLabel,
-                      style: AppTextStyles.labelMedium
-                          .copyWith(color: AppColors.white),
+                      style: AppTextStyles.labelMedium.copyWith(
+                        color: AppColors.white,
+                      ),
                     ),
                   ),
                 )
@@ -131,6 +144,15 @@ class WalkthroughCard extends StatelessWidget {
             ],
           ),
         ],
+      ),
+    );
+
+    if (maxHeight == null) return card;
+    return ConstrainedBox(
+      constraints: BoxConstraints(maxHeight: maxHeight!),
+      child: SingleChildScrollView(
+        physics: const ClampingScrollPhysics(),
+        child: card,
       ),
     );
   }

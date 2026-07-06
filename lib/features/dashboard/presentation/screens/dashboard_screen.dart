@@ -9,7 +9,6 @@ import '../../../../theme/app_colors.dart';
 import '../../../../theme/app_shadows.dart';
 import '../../../../theme/app_spacing.dart';
 import '../../../../theme/app_text_styles.dart';
-import 'package:tutorial_coach_mark/tutorial_coach_mark.dart';
 
 import '../../../../utils/analytics.dart';
 import '../../../../utils/currency_formatter.dart';
@@ -37,10 +36,10 @@ class DashboardScreen extends ConsumerWidget {
       n.onDashboardReady(projectId);
       if (walkStep == WalkStep.budget) {
         n.maybeShowCoach(context, WalkStep.budget,
-            key: WalkthroughKeys.budgetCard, align: ContentAlign.bottom);
+            key: WalkthroughKeys.budgetCard);
       } else if (walkStep == WalkStep.photos) {
         n.maybeShowCoach(context, WalkStep.photos,
-            key: WalkthroughKeys.photosAction, align: ContentAlign.top);
+            key: WalkthroughKeys.photosAction);
       }
     });
 

@@ -4,10 +4,13 @@ import 'package:permission_handler/permission_handler.dart';
 
 import 'permission_dialog.dart';
 
-/// App features that need a runtime permission. Storage is intentionally absent:
-/// backup export/import use the Storage Access Framework + app-private dirs, so
-/// no storage permission is required on any supported OS version.
-enum AppPermissionType { camera, photos }
+/// App features that need a runtime permission. Storage and photo-library
+/// access are intentionally absent: backup export/import use the Storage
+/// Access Framework + app-private dirs, and the gallery picker uses the
+/// system photo picker (Android Photo Picker / iOS PHPicker) which runs
+/// out-of-process and needs no runtime permission — so neither is requested
+/// on any supported OS version.
+enum AppPermissionType { camera }
 
 /// Centralised runtime-permission flow. UI never calls permission_handler
 /// directly — it calls [ensure] and acts on the boolean result.
@@ -21,13 +24,18 @@ enum AppPermissionType { camera, photos }
 class PermissionService {
   const PermissionService();
 
-  Future<bool> ensureCamera(BuildContext context) =>
-      ensure(context, AppPermissionType.camera);
+  Future<bool> ensureCamera(
+    BuildContext context, {
+    VoidCallback? onOpenedSettings,
+  }) =>
+      ensure(context, AppPermissionType.camera,
+          onOpenedSettings: onOpenedSettings);
 
-  Future<bool> ensureGallery(BuildContext context) =>
-      ensure(context, AppPermissionType.photos);
-
-  Future<bool> ensure(BuildContext context, AppPermissionType type) async {
+  Future<bool> ensure(
+    BuildContext context,
+    AppPermissionType type, {
+    VoidCallback? onOpenedSettings,
+  }) async {
     final permission = _permissionFor(type);
     try {
       var status = await permission.status;
@@ -37,7 +45,10 @@ class PermissionService {
 
       // Blocked at OS level — can only be changed in Settings.
       if (status.isPermanentlyDenied || status.isRestricted) {
-        if (context.mounted) await PermissionDialog.show(context, type);
+        if (context.mounted) {
+          final openedSettings = await PermissionDialog.show(context, type);
+          if (openedSettings) onOpenedSettings?.call();
+        }
         return false;
       }
 
@@ -47,7 +58,8 @@ class PermissionService {
 
       if ((status.isPermanentlyDenied || status.isRestricted) &&
           context.mounted) {
-        await PermissionDialog.show(context, type);
+        final openedSettings = await PermissionDialog.show(context, type);
+        if (openedSettings) onOpenedSettings?.call();
       }
       return false;
     } catch (_) {
@@ -60,10 +72,6 @@ class PermissionService {
     switch (type) {
       case AppPermissionType.camera:
         return Permission.camera;
-      case AppPermissionType.photos:
-        // permission_handler maps this to READ_MEDIA_IMAGES on Android 13+,
-        // READ_EXTERNAL_STORAGE on Android ≤12, and Photos on iOS.
-        return Permission.photos;
     }
   }
 }
