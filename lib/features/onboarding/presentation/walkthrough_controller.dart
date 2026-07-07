@@ -220,13 +220,19 @@ class WalkthroughController extends Notifier<WalkStep> {
           paddingFocus: focusPadding,
           enableTargetTab: gated,
           enableOverlayTab: false,
+          // Gentle breathe (subtle scale) instead of the package's snappy
+          // default so the create-project highlight pulses smoothly.
+          pulseVariation: gated ? Tween(begin: 1.0, end: 0.965) : null,
           contents: [content],
         ),
       ],
       colorShadow: AppColors.black,
       opacityShadow: 0.82,
       hideSkip: true,
-      pulseEnable: !gated ? false : true,
+      pulseEnable: gated,
+      // Slow the pulse down from the 500ms default — the fast throb looked
+      // jittery, especially over a large target like the New Project card.
+      pulseAnimationDuration: const Duration(milliseconds: 500),
       onClickTarget: gated ? (_) => _onCreateTap() : null,
     );
     _coach!.show(context: context, rootOverlay: true);

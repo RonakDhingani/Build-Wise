@@ -53,6 +53,14 @@ class BuildWiseApp extends ConsumerWidget {
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light,
       routerConfig: appRouter,
+      // App-wide: tapping empty space anywhere dismisses the keyboard. A
+      // translucent, tap-only detector yields the gesture arena to buttons,
+      // fields and scrolling, so only taps on blank areas unfocus.
+      builder: (context, child) => GestureDetector(
+        behavior: HitTestBehavior.translucent,
+        onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+        child: child,
+      ),
     );
   }
 }

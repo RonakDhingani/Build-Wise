@@ -27,6 +27,7 @@ export 'feedback/app_success_state.dart';
 export 'dialogs/app_confirmation_dialog.dart';
 export 'dialogs/app_delete_dialog.dart';
 export 'dialogs/app_success_dialog.dart';
+export 'dialogs/backup_reminder_dialog.dart';
 export 'layout/app_scaffold.dart';
 export 'layout/app_bar_widget.dart';
 export 'layout/section_header.dart';

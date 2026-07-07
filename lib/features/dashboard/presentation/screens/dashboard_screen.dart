@@ -14,6 +14,7 @@ import '../../../../utils/analytics.dart';
 import '../../../../utils/currency_formatter.dart';
 import '../../../../utils/date_formatter.dart';
 import '../../../expense/domain/entities/expense_entity.dart';
+import '../../../backup/presentation/providers/backup_reminder_controller.dart';
 import '../../../onboarding/presentation/walkthrough_controller.dart';
 import '../../../onboarding/presentation/walkthrough_keys.dart';
 import '../../../onboarding/presentation/walkthrough_step.dart';
@@ -41,6 +42,12 @@ class DashboardScreen extends ConsumerWidget {
         n.maybeShowCoach(context, WalkStep.photos,
             key: WalkthroughKeys.photosAction);
       }
+
+      // One-time backup reminder — self-gated (shown at most once per install,
+      // and only after the onboarding tour has finished).
+      ref
+          .read(backupReminderControllerProvider.notifier)
+          .maybeShow(context, projectId);
     });
 
     return async.when(

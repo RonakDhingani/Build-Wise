@@ -162,7 +162,12 @@ final appRouter = GoRouter(
           name: AppRouteNames.dataManagement,
           builder: (context, state) {
             final id = int.parse(state.pathParameters['id']!);
-            return DataManagementScreen(projectId: id);
+            final highlightExport =
+                state.uri.queryParameters['highlight'] == 'export';
+            return DataManagementScreen(
+              projectId: id,
+              highlightExport: highlightExport,
+            );
           },
           routes: [
             GoRoute(
@@ -524,8 +529,14 @@ class _BottomNavState extends ConsumerState<_BottomNav> {
         final origin = navBox.localToGlobal(Offset.zero);
         final tabWidth = navBox.size.width / _tabs.length;
         final index = _stepTabIndex[step]!;
+        // BottomNavigationBar reserves the bottom safe-area inset (e.g. the
+        // iOS home indicator) below the actual icon+label row. Excluding it
+        // keeps the spotlight tight around the real tab cell instead of a
+        // tall box that spills into the gesture area on iOS.
+        final bottomInset = MediaQuery.of(context).padding.bottom;
+        final tabHeight = navBox.size.height - bottomInset;
         final tabPosition = TargetPosition(
-          Size(tabWidth, navBox.size.height),
+          Size(tabWidth, tabHeight),
           Offset(origin.dx + tabWidth * index, origin.dy),
         );
         ref.read(walkthroughControllerProvider.notifier).maybeShowCoach(

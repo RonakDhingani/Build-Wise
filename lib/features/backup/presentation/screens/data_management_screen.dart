@@ -15,14 +15,24 @@ import '../../../settings/presentation/widgets/settings_group.dart';
 import '../../../settings/presentation/widgets/settings_tile.dart';
 import '../../data/models/backup_result.dart';
 import '../../domain/backup_format.dart';
+import '../providers/backup_prefs_providers.dart';
 import '../providers/backup_providers.dart';
+import '../widgets/backup_status_card.dart';
 
 /// Settings → Data Management. Offline export, import and restore. Everything
 /// here works without a backend, cloud service or internet connection.
 class DataManagementScreen extends ConsumerStatefulWidget {
-  const DataManagementScreen({super.key, required this.projectId});
+  const DataManagementScreen({
+    super.key,
+    required this.projectId,
+    this.highlightExport = false,
+  });
 
   final int projectId;
+
+  /// When true (arriving via the backup reminder's "Backup Now" action), the
+  /// Backup Status card is scrolled into view and briefly highlighted.
+  final bool highlightExport;
 
   @override
   ConsumerState<DataManagementScreen> createState() =>
@@ -32,21 +42,61 @@ class DataManagementScreen extends ConsumerStatefulWidget {
 class _DataManagementScreenState extends ConsumerState<DataManagementScreen> {
   bool _busy = false;
   String _busyLabel = '';
+  bool _highlight = false;
+  final _scrollController = ScrollController();
+  final _statusCardKey = GlobalKey();
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.highlightExport) {
+      _highlight = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) => _revealStatusCard());
+    }
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _revealStatusCard() async {
+    final ctx = _statusCardKey.currentContext;
+    if (ctx != null) {
+      await Scrollable.ensureVisible(
+        ctx,
+        duration: const Duration(milliseconds: 400),
+        curve: Curves.easeInOut,
+        alignment: 0.05,
+      );
+    }
+    await Future<void>.delayed(const Duration(milliseconds: 1800));
+    if (mounted) setState(() => _highlight = false);
+  }
 
   @override
   Widget build(BuildContext context) {
     return AppScaffold(
-      appBar: const AppBarWidget(title: 'Data Management'),
+      appBar: const AppBarWidget(title: 'Backup & Restore'),
       body: Stack(
         children: [
           SafeArea(
             bottom: false,
             child: ListView(
+              controller: _scrollController,
               padding: const EdgeInsets.only(
                 top: AppSpacing.lg,
                 bottom: AppSpacing.xxxl,
               ),
               children: [
+                BackupStatusCard(
+                  key: _statusCardKey,
+                  highlighted: _highlight,
+                  onCreateBackup: () =>
+                      _showExportSheet(BackupScope.currentProject),
+                ),
+                const SizedBox(height: AppSpacing.xl),
                 _OfflineBanner(),
                 const SizedBox(height: AppSpacing.xl),
                 SettingsGroup(
@@ -258,8 +308,17 @@ class _DataManagementScreenState extends ConsumerState<DataManagementScreen> {
         fileName: result.fileName,
         bytes: bytes,
       );
-      if (!mounted) return;
-      if (saved != null) {
+      // A backup counts as "done" only once the user has actually completed
+      // the Save File step — cancelling the picker returns null. The picker's
+      // returned path is unreliable to stat across platforms (Android SAF
+      // content URIs, scoped storage), so instead verify against the archive
+      // we wrote ourselves at [result.filePath], which we know is on disk.
+      final isSaved = saved != null && File(result.filePath).existsSync();
+      if (isSaved) {
+        await ref
+            .read(backupPrefsProvider.notifier)
+            .recordBackup(DateTime.now());
+        if (!mounted) return;
         _toast('Backup saved.');
       }
     } catch (_) {
