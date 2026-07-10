@@ -51,21 +51,26 @@ class ProjectSelectionScreen extends ConsumerWidget {
         title: 'BuildWise',
         showBackButton: false,
         actions: [
+          // Only surface the archive toggle when archived projects exist.
           state.whenOrNull(
-            data: (s) => IconButton(
-              icon: Icon(
-                s.showArchived
-                    ? Icons.inventory_2
-                    : Icons.inventory_2_outlined,
-                color: s.showArchived
-                    ? LightThemeColors.primary
-                    : LightThemeColors.textSecondary,
-              ),
-              tooltip: s.showArchived ? 'Hide archived' : 'Show archived',
-              onPressed: () {
-                ref.read(projectsNotifierProvider.notifier).toggleShowArchived();
-              },
-            ),
+            data: (s) => s.hasArchived
+                ? IconButton(
+                    icon: Icon(
+                      s.showArchived
+                          ? Icons.inventory_2
+                          : Icons.inventory_2_outlined,
+                      color: s.showArchived
+                          ? LightThemeColors.primary
+                          : LightThemeColors.textSecondary,
+                    ),
+                    tooltip: s.showArchived ? 'Hide archived' : 'Show archived',
+                    onPressed: () {
+                      ref
+                          .read(projectsNotifierProvider.notifier)
+                          .toggleShowArchived();
+                    },
+                  )
+                : const SizedBox.shrink(),
           ) ?? const SizedBox.shrink(),
         ],
       ),

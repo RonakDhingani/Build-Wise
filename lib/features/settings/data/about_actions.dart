@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:in_app_review/in_app_review.dart';
 import 'package:share_plus/share_plus.dart';
@@ -16,7 +17,17 @@ class AboutActions {
       'materials, stages and reports, fully offline.';
 
   /// Native in-app review first; fall back to the store listing.
+  ///
+  /// NOTE: the in-app review card only renders for Play-Store-delivered builds
+  /// (internal app sharing / closed testing / production), and Google throttles
+  /// it hard — a `flutter run`/debug build always no-ops silently even though
+  /// the plugin logs "Successfully requested review flow". In debug we skip
+  /// straight to the store so the URL + flow are verifiable during development.
   Future<void> rate() async {
+    if (kDebugMode) {
+      await _remoteConfig.openStore();
+      return;
+    }
     final review = InAppReview.instance;
     try {
       if (await review.isAvailable()) {

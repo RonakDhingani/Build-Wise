@@ -17,6 +17,8 @@ abstract class AppStrings {
   static const String noProjects = 'No projects yet';
   static const String noProjectsSubtitle = 'Create your first construction project to get started.';
   static const String projectName = 'Project Name';
+  static const String projectNameExists =
+      'A project with this name already exists';
   static const String projectLocation = 'Location';
   static const String projectBudget = 'Total Budget';
   static const String startDate = 'Start Date';

@@ -362,13 +362,10 @@ class _DropdownCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final projects = ref
-            .watch(projectsNotifierProvider)
-            .valueOrNull
-            ?.projects
-            .where((p) => p.status == ProjectStatus.active)
-            .toList() ??
-        const [];
+    // Show every project — active and archived — so an archived project you're
+    // viewing can switch to any other, and vice versa.
+    final projects =
+        ref.watch(projectsNotifierProvider).valueOrNull?.projects ?? const [];
 
     return Material(
       elevation: 8,

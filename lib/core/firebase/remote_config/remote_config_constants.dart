@@ -31,7 +31,7 @@ abstract class RemoteConfigDefaults {
     RemoteConfigKeys.updateMessage:
         'A new version of BuildWise is available with improvements and fixes.',
     RemoteConfigKeys.releaseNotes: '',
-    RemoteConfigKeys.androidStoreUrl: 'https://play.google.com/store/apps/details?id=com.mybusrouting&pcampaignid=web_share',
+    RemoteConfigKeys.androidStoreUrl: 'https://play.google.com/store/apps/details?id=com.buildwise',
     RemoteConfigKeys.iosStoreUrl: '',
     RemoteConfigKeys.maintenanceEnabled: false,
     RemoteConfigKeys.maintenanceTitle: 'Under Maintenance',

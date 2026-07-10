@@ -15,9 +15,16 @@ class ProjectsState {
   final String searchQuery;
   final bool showArchived;
 
+  /// True if at least one project is archived. Drives the app-bar archive
+  /// toggle visibility — no archived projects, no toggle.
+  bool get hasArchived =>
+      projects.any((p) => p.status == ProjectStatus.archived);
+
   List<ProjectEntity> get filtered {
+    // Archived view shows ONLY archived projects; default view shows ONLY
+    // active ones. The two lists never mix.
     var list = showArchived
-        ? projects
+        ? projects.where((p) => p.status == ProjectStatus.archived).toList()
         : projects.where((p) => p.status == ProjectStatus.active).toList();
 
     if (searchQuery.isNotEmpty) {
@@ -78,6 +85,18 @@ class ProjectsNotifier extends AsyncNotifier<ProjectsState> {
     state.whenData((s) {
       state = AsyncData(s.copyWith(showArchived: !s.showArchived));
     });
+  }
+
+  /// True if a project with the given [name] already exists (case-insensitive,
+  /// trimmed). Checks active and archived projects so names stay unique across
+  /// the whole app. Pass [excludeId] to ignore the project being edited.
+  bool nameExists(String name, {int? excludeId}) {
+    final target = name.trim().toLowerCase();
+    if (target.isEmpty) return false;
+    final projects = state.valueOrNull?.projects ?? const [];
+    return projects.any(
+      (p) => p.id != excludeId && p.name.trim().toLowerCase() == target,
+    );
   }
 
   Future<ProjectEntity?> createProject(ProjectEntity entity) async {

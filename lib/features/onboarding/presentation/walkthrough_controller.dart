@@ -263,28 +263,50 @@ class WalkthroughController extends Notifier<WalkStep> {
     showDialog<void>(
       context: ctx,
       barrierDismissible: false,
-      builder: (dialogCtx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Text(step.title),
-        content: Text(step.description),
-        actions: [
-          if (!isFinish)
-            TextButton(
-              onPressed: () {
-                Navigator.of(dialogCtx).pop();
-                skip();
-              },
-              child: const Text('Skip'),
+      builder: (dialogCtx) {
+        final scheme = Theme.of(dialogCtx).colorScheme;
+        return AlertDialog(
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          title: Text(step.title),
+          content: Text(step.description),
+          // Stack actions vertically so the primary action sits on top and
+          // Skip (bordered) below it, full width.
+          actionsPadding: const EdgeInsets.fromLTRB(24, 0, 24, 20),
+          actions: [
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.of(dialogCtx).pop();
+                    advance();
+                  },
+                  child: Text(nextLabel),
+                ),
+                if (!isFinish) ...[
+                  const SizedBox(height: 10),
+                  OutlinedButton(
+                    onPressed: () {
+                      Navigator.of(dialogCtx).pop();
+                      skip();
+                    },
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: scheme.primary,
+                      side: BorderSide(color: scheme.primary, width: 1.5),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: const Text('Skip'),
+                  ),
+                ],
+              ],
             ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.of(dialogCtx).pop();
-              advance();
-            },
-            child: Text(nextLabel),
-          ),
-        ],
-      ),
+          ],
+        );
+      },
     );
   }
 

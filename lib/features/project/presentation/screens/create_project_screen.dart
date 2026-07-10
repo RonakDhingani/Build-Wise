@@ -33,6 +33,9 @@ class _CreateProjectScreenState extends ConsumerState<CreateProjectScreen> {
   DateTime? _completionDate;
   bool _isSaving = false;
   bool _showOptional = false;
+  // Duplicate-name error surfaced inline under the name field; cleared as the
+  // user edits the name.
+  String? _nameError;
 
   @override
   void dispose() {
@@ -66,7 +69,14 @@ class _CreateProjectScreenState extends ConsumerState<CreateProjectScreen> {
               controller: _nameCtrl,
               maxLength: 100,
               textCapitalization: TextCapitalization.words,
-              validator: Validators.required,
+              validator: (v) {
+                final base = Validators.required(v);
+                if (base != null) return base;
+                return _nameError;
+              },
+              onChanged: (_) {
+                if (_nameError != null) setState(() => _nameError = null);
+              },
               autofocus: true,
             ),
             const SizedBox(height: AppSpacing.lg),
@@ -168,7 +178,17 @@ class _CreateProjectScreenState extends ConsumerState<CreateProjectScreen> {
   }
 
   Future<void> _onSave() async {
+    // Clear any stale duplicate error before re-validating.
+    _nameError = null;
     if (!(_formKey.currentState?.validate() ?? false)) return;
+
+    // Block duplicate names (case-insensitive) before writing.
+    final name = _nameCtrl.text.trim();
+    if (ref.read(projectsNotifierProvider.notifier).nameExists(name)) {
+      setState(() => _nameError = AppStrings.projectNameExists);
+      _formKey.currentState?.validate();
+      return;
+    }
 
     setState(() => _isSaving = true);
 
