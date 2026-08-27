@@ -1,5 +1,4 @@
 User-agent: *
 Allow: /
 
-# Replace the host below with your live domain (e.g. GitHub Pages URL).
-Sitemap: https://YOUR-DOMAIN-HERE/sitemap.xml
+Sitemap: https://ronakdhingani.github.io/Build-Wise/website/sitemap.xml
